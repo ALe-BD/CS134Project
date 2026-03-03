@@ -23,6 +23,10 @@ public class ECBMotor2D : MonoBehaviour
     public float groundSnapDistance = 0.08f;
     public float skin = 0.02f;
 
+    [Header("Slopes")]
+    [SerializeField] private bool useSlopeTangent = true;
+    [SerializeField] private float groundStickVelocity = 2.0f; // small downward to stay glued on slopes
+
     [Tooltip("Treat surfaces as ground if normal.y >= this value.")]
     [Range(0f, 1f)]
     public float minGroundNormalY = 0.7f;
@@ -159,9 +163,28 @@ public class ECBMotor2D : MonoBehaviour
             Velocity = new Vector2(Velocity.x, vy);
         }
         
+        if (Grounded && Velocity.y <= 0.01f)
+        {
+            Velocity = new Vector2(Velocity.x, -groundStickVelocity);
+        }
         // Move: resolve axis separately for predictability (platform-fighter style)
         Vector2 delta = Velocity * dt;
+        if (useSlopeTangent && Grounded && Velocity.y <= 0.01f)
+        {
+            Vector2 tangent = GetGroundTangent();
 
+            // take intended horizontal displacement and move it along the slope
+            Vector2 slopeMove = tangent * (delta.x);
+
+            if (Mathf.Abs(slopeMove.x) > 0f || Mathf.Abs(slopeMove.y) > 0f)
+                MoveAndCollide(slopeMove, axisIsVertical: false);
+
+            // then apply remaining vertical (usually just the small stick velocity)
+            if (Mathf.Abs(delta.y) > 0f)
+                MoveAndCollide(new Vector2(0f, delta.y), axisIsVertical: true);
+        }
+        else
+        {
         // Horizontal
         if (Mathf.Abs(delta.x) > 0f)
             MoveAndCollide(new Vector2(delta.x, 0f), axisIsVertical: false);
@@ -169,7 +192,8 @@ public class ECBMotor2D : MonoBehaviour
         // Vertical (handles landing / head bonk)
         if (Mathf.Abs(delta.y) > 0f)
             MoveAndCollide(new Vector2(0f, delta.y), axisIsVertical: true);
-
+        }
+        
         // Ground check + snap
         UpdateGroundedAndSnap();
     }
@@ -246,29 +270,39 @@ public class ECBMotor2D : MonoBehaviour
     }
 
     bool IsValidPlatformHit(RaycastHit2D hit, Vector2 ecbCenter)
-    {
-        // One-way rule: only land if you're above the platform "top"
-        // For BoxCollider2D platforms, top surface is bounds.max.y.
-        float platformTopY = hit.collider.bounds.max.y;
+{
+    // Only treat as one-way ground if we're moving downward or basically not going up
+    if (Velocity.y > 0.01f)
+        return false;
 
-        // Use ECB bottom before move: must be above (or very slightly above) platform top.
-        float ecbBottomY = (ecbCenter.y - ECBHalfHeight);
+    // Must be mostly upward-facing (works for slopes too)
+    if (hit.normal.y < minGroundNormalY)
+        return false;
 
-        // If ECB is already below or intersecting from the side/below, ignore platform collision
-        if (ecbBottomY < platformTopY - 0.01f)
-            return false;
+    // Use the contact point (local surface height), NOT bounds.max.y (which breaks on slopes)
+    float surfaceY = hit.point.y;
 
-        // Also require a mostly-upward normal (prevents catching platform edges weirdly)
-        if (hit.normal.y < minGroundNormalY)
-            return false;
+    // ECB bottom BEFORE moving
+    float ecbBottomY = ecbCenter.y - ECBHalfHeight;
 
-        return true;
-    }
+    // Only land if bottom is above (or very slightly above) the surface at the contact point
+    const float tolerance = 0.02f; // tweak if needed
+    if (ecbBottomY < surfaceY - tolerance)
+        return false;
+
+    return true;
+}
 
     private static bool LayerInMask(int layer, LayerMask mask) => (mask.value & (1 << layer)) != 0;
 
     void UpdateGroundedAndSnap()
     {
+        if (Velocity.y > 0.01f)
+        {
+            Grounded = false;
+            GroundNormal = Vector2.up;
+            return;
+        }
         bool allowSnap = Velocity.y <= 0.01f;
         Vector2 pos = transform.position; 
         Vector2 center = pos + ecbOffset; 
@@ -316,7 +350,17 @@ public class ECBMotor2D : MonoBehaviour
             Grounded = false; 
             GroundNormal = Vector2.up;
     }
-    
+    private Vector2 GetGroundTangent()
+    {
+        // Perpendicular to normal (points "along" the surface)
+        Vector2 t = new Vector2(GroundNormal.y, -GroundNormal.x);
+        return t.normalized;
+    }
+
+    private static Vector2 ProjectOn(Vector2 v, Vector2 dirNormalized)
+    {
+        return dirNormalized * Vector2.Dot(v, dirNormalized);
+    }
 
     void OnDrawGizmosSelected()
     {

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.VFX;
 
 public class InputAdapter : MonoBehaviour
 {
@@ -10,6 +11,8 @@ public class InputAdapter : MonoBehaviour
     [Header("Jump")]
     [SerializeField] private int jumpAmount = 2;     // total jumps (1 = no double jump, 2 = double jump)
     [SerializeField] private float jumpSpeed = 14f;
+    [SerializeField] private ParticleSystem jumpVFX;
+    
 
     [Header("Timing")]
     [SerializeField] private float coyoteTime = 0.12f;
@@ -24,11 +27,13 @@ public class InputAdapter : MonoBehaviour
     [SerializeField] private float dashSpeed = 18f;
     [SerializeField] private float dashDuration = 0.18f;
     [SerializeField] private float dashCooldown = 0.25f;
+    [SerializeField] private int maxAirDashes = 1;
 
     private bool isDashing;
     private float dashTimer;
     private float dashCooldownTimer;
     private Vector2 dashDirection;
+    private int dashCount;
 
     private int jumpCount = 1;                 // 1 means "used ground jump already?" (see resets below)
     private float lastGroundedTime = -999f;    // time we were last grounded
@@ -44,26 +49,30 @@ public class InputAdapter : MonoBehaviour
     {
         if (!ctx.performed) return;
 
+        if (jumpCount < jumpAmount)
+        {
+            jumpVFX.Play();
+            jumpVFX.transform.localPosition = transform.localPosition;
+        }
+        
+
         // Buffer the jump press; we'll attempt to consume it in Update after motor ticks.
         lastJumpPressedTime = Time.time;
     }
     public void OnDash(InputAction.CallbackContext ctx)
     {
 
-        if (ctx.performed)
-        {
+        if (!ctx.performed) return;
             Debug.Log("Dashed");
 
             if (isDashing) return;
             if (dashCooldownTimer > 0f) return;
 
+            // Limit air dashes
+            if (!motor.Grounded && dashCount >= maxAirDashes)
+                return;
+
             StartDash();
-            walkSpeed = dashSpeed;
-        }
-        if (ctx.canceled)
-        {
-            walkSpeed = 6.5f;
-        }
     }
 
     public void OnDrop(InputAction.CallbackContext ctx)
@@ -74,6 +83,7 @@ public class InputAdapter : MonoBehaviour
 
     void Update()
     {
+
         // Update timers
         if (dashCooldownTimer > 0f)
             dashCooldownTimer -= Time.deltaTime;
@@ -99,6 +109,7 @@ public class InputAdapter : MonoBehaviour
         {
             lastGroundedTime = Time.time;
             jumpCount = 1; // reset air-jump state when on ground
+            dashCount = 0;
         }
     }
 
@@ -139,7 +150,12 @@ public class InputAdapter : MonoBehaviour
         isDashing = true;
         dashTimer = dashDuration;
         dashCooldownTimer = dashCooldown;
-
+        
+        if (!motor.Grounded)
+        {
+            dashCount++;  
+        }
+        
         // Use stick direction if present
         if (move.magnitude > 0.1f)
             dashDirection = move.normalized;
