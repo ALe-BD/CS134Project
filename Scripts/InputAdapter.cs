@@ -20,8 +20,16 @@ public class InputAdapter : MonoBehaviour
 
     [Header("Move")]
     [SerializeField] private float walkSpeed = 6.5f;
-
     private Vector2 move;
+
+    [Header("Movement Acceleration")]
+    [SerializeField] private float groundAcceleration = 80f;
+    [SerializeField] private float airAcceleration = 40f;
+
+    [SerializeField] private float groundDeceleration = 100f;
+    [SerializeField] private float airDeceleration = 50f;
+
+    [SerializeField] private float maxAirSpeedMultiplier = 1.0f; 
 
     [Header("Dash")]
     [SerializeField] private float dashSpeed = 18f;
@@ -48,13 +56,6 @@ public class InputAdapter : MonoBehaviour
     public void OnJump(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
-
-        if (jumpCount < jumpAmount)
-        {
-            jumpVFX.Play();
-            jumpVFX.transform.localPosition = transform.localPosition;
-        }
-        
 
         // Buffer the jump press; we'll attempt to consume it in Update after motor ticks.
         lastJumpPressedTime = Time.time;
@@ -95,7 +96,63 @@ public class InputAdapter : MonoBehaviour
         }
 
         // Horizontal drive
-        motor.AddVelocity(new Vector2(move.x * walkSpeed - motor.Velocity.x, 0f));
+
+        // Determine if grounded
+        bool isGrounded = motor.Grounded;
+
+        // Choose acceleration and deceleration
+        float acceleration;
+        float deceleration;
+
+        if (isGrounded)
+        {
+            acceleration = groundAcceleration;
+            deceleration = groundDeceleration;
+        }
+        else
+        {
+            acceleration = airAcceleration;
+            deceleration = airDeceleration;
+        }
+
+        // Determine max allowed speed
+        float maxSpeed = walkSpeed;
+
+        if (!isGrounded)
+        {
+            maxSpeed = walkSpeed * maxAirSpeedMultiplier;
+        }
+
+        // Desired velocity based on input
+        float targetVelocityX = move.x * maxSpeed;
+
+        // Current velocity
+        float currentVelocityX = motor.Velocity.x;
+
+        float newVelocityX;
+
+        // If there is input, accelerate toward target
+        if (Mathf.Abs(move.x) > 0.01f)
+        {
+            newVelocityX = Mathf.MoveTowards(
+                currentVelocityX,
+                targetVelocityX,
+                acceleration * Time.deltaTime
+            );
+        }
+        else
+        {
+            // No input → slow down toward 0
+            newVelocityX = Mathf.MoveTowards(
+                currentVelocityX,
+                0f,
+                deceleration * Time.deltaTime
+            );
+        }
+
+        // Apply velocity change
+        float velocityChange = newVelocityX - currentVelocityX;
+        motor.AddVelocity(new Vector2(velocityChange, 0f));
 
         if (move.x > 0.1f) facingDirection = 1;
         else if (move.x < -0.1f) facingDirection = -1;
@@ -125,6 +182,8 @@ public class InputAdapter : MonoBehaviour
         if (groundedNow || canCoyoteJump)
         {
             motor.SetVerticalVelocity(jumpSpeed);
+            motor.InheritPlatformVelocityOnce();
+            motor.SetVerticalVelocity(jumpSpeed);
 
             // Consume buffer + consume coyote so you can’t use it twice
             lastJumpPressedTime = -999f;
@@ -137,6 +196,8 @@ public class InputAdapter : MonoBehaviour
         // Air jump(s)
         if (jumpCount < jumpAmount)
         {
+            jumpVFX.Play();
+            jumpVFX.transform.localPosition = transform.localPosition;
             motor.SetVerticalVelocity(jumpSpeed);
             jumpCount++;
 
@@ -168,7 +229,7 @@ public class InputAdapter : MonoBehaviour
         dashTimer -= Time.deltaTime;
 
         // Override velocity completely during dash
-        motor.SetVerticalVelocity(0f);
+        //motor.SetVerticalVelocity(0f);
         motor.AddVelocity(dashDirection * dashSpeed - motor.Velocity);
 
         if (dashTimer <= 0f)

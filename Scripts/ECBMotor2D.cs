@@ -17,6 +17,17 @@ public class ECBMotor2D : MonoBehaviour
     public LayerMask platformMask;
     public LayerMask oneWayNoDropMask;
 
+    [Header("Moving Platforms")]
+    [SerializeField] private bool rideMovingPlatforms = true;
+    [SerializeField] private bool preservePlatformMomentum = true;
+    [SerializeField] private float preservedPerc = 1f;
+    private bool wasGroundedLastFrame;
+    private Vector2 lastPlatformVelocity;
+    public Vector2 PlatformVelocity { get; private set; }
+    private Collider2D groundCollider;
+    private Rigidbody2D groundBody;
+    private Vector2 lastGroundBodyPos;
+
     [Header("Movement")]
     public float gravity = 40f;
     public float maxFallSpeed = 30f;
@@ -152,6 +163,8 @@ public class ECBMotor2D : MonoBehaviour
     void Tick(float dt)
     {
         DepenetrateFromSolids();
+
+        ApplyMovingPlatformMotion(dt);
         // Timers
         if (dropTimer > 0f) dropTimer -= dt;
 
@@ -196,6 +209,20 @@ public class ECBMotor2D : MonoBehaviour
         
         // Ground check + snap
         UpdateGroundedAndSnap();
+        // After grounding is updated, preserve platform momentum if we just left the ground
+        if (preservePlatformMomentum)
+        {
+            bool justLeftGround = (wasGroundedLastFrame && !Grounded);
+
+            if (justLeftGround)
+            {
+                // Add platform velocity once so it carries into the air
+                Velocity += lastPlatformVelocity;
+            }
+        }
+
+        // Store for next frame
+        wasGroundedLastFrame = Grounded;
     }
 
     void MoveAndCollide(Vector2 move, bool axisIsVertical)
@@ -295,12 +322,16 @@ public class ECBMotor2D : MonoBehaviour
 
     private static bool LayerInMask(int layer, LayerMask mask) => (mask.value & (1 << layer)) != 0;
 
-    void UpdateGroundedAndSnap()
+    private void UpdateGroundedAndSnap()
     {
         if (Velocity.y > 0.01f)
         {
             Grounded = false;
             GroundNormal = Vector2.up;
+
+            groundCollider = null;
+            groundBody = null;
+            PlatformVelocity = Vector2.zero;
             return;
         }
         bool allowSnap = Velocity.y <= 0.01f;
@@ -327,13 +358,31 @@ public class ECBMotor2D : MonoBehaviour
             // Platform filtering 
             if (((1 << hit.collider.gameObject.layer) & platformMask) != 0) { 
                 if (!IsValidPlatformHit(hit, center)) { 
-                    Grounded = false; GroundNormal = Vector2.up; return; 
+                    Grounded = false; 
+                    GroundNormal = Vector2.up; 
+                    
+                    groundCollider = null;
+                    groundBody = null;
+                    PlatformVelocity = Vector2.zero;
+                    return; 
                 } } 
                 bool isGround = hit.normal.y >= minGroundNormalY; 
                 if (isGround) { 
                      // Key change: don't "re-ground" and snap while rising
                     Grounded = allowSnap;
                     GroundNormal = hit.normal;
+
+                    if (Grounded)
+                        {
+                            groundCollider = hit.collider;
+                            groundBody = hit.rigidbody;
+
+                            // Initialize last position when we land (prevents 1-frame pop)
+                            if (groundBody != null)
+                                lastGroundBodyPos = groundBody.position;
+                            else
+                                lastGroundBodyPos = groundCollider.transform.position;
+                        }
                     // Snap down (prevents hovering) ONLY when not moving upward
                     if (allowSnap)
                     {
@@ -349,6 +398,11 @@ public class ECBMotor2D : MonoBehaviour
             } 
             Grounded = false; 
             GroundNormal = Vector2.up;
+
+            groundCollider = null;
+            groundBody = null;
+            PlatformVelocity = Vector2.zero;
+            
     }
     private Vector2 GetGroundTangent()
     {
@@ -360,6 +414,48 @@ public class ECBMotor2D : MonoBehaviour
     private static Vector2 ProjectOn(Vector2 v, Vector2 dirNormalized)
     {
         return dirNormalized * Vector2.Dot(v, dirNormalized);
+    }
+
+    private void ApplyMovingPlatformMotion(float dt)
+    {
+        if (!rideMovingPlatforms)
+        {
+            PlatformVelocity = Vector2.zero;
+            return;
+        }
+
+        if (!Grounded || groundCollider == null)
+        {
+            PlatformVelocity = Vector2.zero;
+            groundBody = null;
+            return;
+        }
+
+        // Where is the platform now?
+        Vector2 currentPos;
+
+        if (groundBody != null)
+            currentPos = groundBody.position;
+        else
+            currentPos = (Vector2)groundCollider.transform.position;
+
+        // How far did it move since last frame?
+        Vector2 delta = currentPos - lastGroundBodyPos;
+
+        // Move the player by the platform's delta
+        if (delta != Vector2.zero)
+            transform.position += (Vector3)delta;
+
+        // Expose velocity for other systems (optional)
+        PlatformVelocity = (dt > 0f) ? (delta / dt) : Vector2.zero;
+
+        // Store for next frame
+        lastPlatformVelocity = PlatformVelocity;
+        lastGroundBodyPos = currentPos;
+    }
+    public void InheritPlatformVelocityOnce()
+    {
+        Velocity += lastPlatformVelocity * preservedPerc;
     }
 
     void OnDrawGizmosSelected()
