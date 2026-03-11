@@ -1,12 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class ECBMotor2D : MonoBehaviour
 {
     [Header("ECB (environment collision shape)")]
-    [Tooltip("ECB box size in world units (width, height)")]
+    [Tooltip("ECB diamond size in world units (width tip-to-tip, height tip-to-tip)")]
     public Vector2 ecbSize = new Vector2(0.6f, 1.4f);
 
     [Tooltip("ECB center offset from transform.position (world units).")]
@@ -36,7 +35,7 @@ public class ECBMotor2D : MonoBehaviour
 
     [Header("Slopes")]
     [SerializeField] private bool useSlopeTangent = true;
-    [SerializeField] private float groundStickVelocity = 2.0f; // small downward to stay glued on slopes
+    [SerializeField] private float groundStickVelocity = 2.0f;
 
     [Tooltip("Treat surfaces as ground if normal.y >= this value.")]
     [Range(0f, 1f)]
@@ -48,6 +47,9 @@ public class ECBMotor2D : MonoBehaviour
 
     [Header("Debug")]
     public bool drawGizmos = true;
+    public bool debugCast = true;
+    public Color castColor = Color.red;
+    public Color hitColor = Color.green;
 
     // Public state
     public Vector2 Velocity { get; private set; }
@@ -57,33 +59,57 @@ public class ECBMotor2D : MonoBehaviour
 
     float dropTimer;
 
-    // Optional: expose ECB bottom for other systems (ledge checks, etc.)
+    // Diamond geometry helpers (still valid: tips are at +/- half-height and +/- half-width)
     public Vector2 ECBWorldCenter => (Vector2)transform.position + ecbOffset;
     public float ECBHalfHeight => ecbSize.y * 0.5f;
     public float ECBHalfWidth => ecbSize.x * 0.5f;
     public Vector2 ECBWorldBottom => ECBWorldCenter + Vector2.down * (ECBHalfHeight);
 
     [Header("Depenetration (eject from solids)")]
-    [SerializeField] private BoxCollider2D ecbQueryCollider;
+    [SerializeField] private PolygonCollider2D ecbQueryCollider;
     [SerializeField] private int depenetrationMaxIters = 10;
-    [SerializeField] private float depenetrationExtra = 0.001f; // tiny bias to fully clear seams
+    [SerializeField] private float depenetrationExtra = 0.001f;
     [SerializeField] private int overlapBufferSize = 32;
 
     private Collider2D[] _overlapBuf;
 
+    // Cast buffer (we only need the closest hit)
+    private RaycastHit2D[] _castHits = new RaycastHit2D[8];
+
     void Awake()
     {
+        Physics2D.queriesHitTriggers = false;
         if (!ecbQueryCollider)
-            ecbQueryCollider = GetComponent<BoxCollider2D>();
+            ecbQueryCollider = GetComponent<PolygonCollider2D>();
 
-        if (ecbQueryCollider)
-        {
-            ecbQueryCollider.isTrigger = true;
-            ecbQueryCollider.size = ecbSize;
-            ecbQueryCollider.offset = ecbOffset;
-        }
+        if (!ecbQueryCollider)
+            ecbQueryCollider = gameObject.AddComponent<PolygonCollider2D>();
+
+        ecbQueryCollider.isTrigger = true;
+        SyncDiamondCollider();
+        Debug.Log($"ECB enabled={ecbQueryCollider.enabled} pathCount={ecbQueryCollider.pathCount} points={ecbQueryCollider.GetPath(0).Length}");
 
         _overlapBuf = new Collider2D[overlapBufferSize];
+    }
+
+    void SyncDiamondCollider()
+    {
+        if (!ecbQueryCollider) return;
+
+        // Diamond points in local space around collider origin (0,0), using tip-to-tip sizes.
+        // Order matters (clockwise or ccw). We'll do ccw:
+        // top -> right -> bottom -> left
+        Vector2 top    = new Vector2(0f,  ECBHalfHeight);
+        Vector2 right  = new Vector2( ECBHalfWidth, 0f);
+        Vector2 bottom = new Vector2(0f, -ECBHalfHeight);
+        Vector2 left   = new Vector2(-ECBHalfWidth, 0f);
+
+        ecbQueryCollider.pathCount = 1;
+        ecbQueryCollider.SetPath(0, new Vector2[] { top, right, bottom, left });
+
+        // Offset positions the diamond center relative to transform.position
+        ecbQueryCollider.offset = ecbOffset;
+        ecbQueryCollider.isTrigger = true;
     }
 
     void DepenetrateFromSolids()
@@ -91,23 +117,15 @@ public class ECBMotor2D : MonoBehaviour
         if (!ecbQueryCollider) return;
 
         // Keep query collider in sync with ECB settings (in case you tweak in inspector)
-        ecbQueryCollider.size = ecbSize;
-        ecbQueryCollider.offset = ecbOffset;
-        ecbQueryCollider.isTrigger = true;
+        SyncDiamondCollider();
+
+        var filter = BuildFilter(solidMask);
 
         for (int iter = 0; iter < depenetrationMaxIters; iter++)
         {
-            int count = Physics2D.OverlapBoxNonAlloc(
-                ECBWorldCenter,
-                ecbSize,
-                0f,
-                _overlapBuf,
-                solidMask
-            );
+            int count = ecbQueryCollider.OverlapCollider(filter, _overlapBuf);
+            if (count == 0) return;
 
-            if (count == 0) return; // clean
-
-            // Choose the single strongest push this iteration (stable at corners)
             bool foundOverlap = false;
             Vector2 bestPush = Vector2.zero;
             float bestAbsDistance = 0f;
@@ -117,39 +135,67 @@ public class ECBMotor2D : MonoBehaviour
                 Collider2D other = _overlapBuf[i];
                 if (!other || other == ecbQueryCollider) continue;
 
-                // Distance gives us normal + signed distance
                 ColliderDistance2D d = Physics2D.Distance(ecbQueryCollider, other);
-
                 if (!d.isOverlapped) continue;
 
                 foundOverlap = true;
 
                 // d.distance is negative when overlapped
                 float absDist = -d.distance;
-
                 if (absDist > bestAbsDistance)
                 {
                     bestAbsDistance = absDist;
 
-                    // Push OUT along d.normal by the penetration depth + skin bias
+                    // Push OUT along normal by penetration depth + bias
                     bestPush = d.normal * (d.distance - skin - depenetrationExtra);
-                    // since d.distance is negative, this becomes a push along +normal
                 }
             }
 
             if (!foundOverlap) return;
 
-            // Apply the best push
             transform.position += (Vector3)bestPush;
-
-            // Optional: if you want, kill velocity when forcibly ejected
-            // Velocity = Vector2.zero;
         }
     }
 
     void Update()
     {
+        int floorLayer = GameObject.Find("Ground").layer;
+        Debug.Log($"Floor layer={floorLayer} includedInSolidMask={(solidMask.value & (1 << floorLayer)) != 0}");
         Tick(Time.deltaTime);
+    }
+    void LateUpdate()
+    {
+        Vector2 origin = (Vector2)transform.position + ecbOffset;
+        float dist = 5f;
+
+        // Hit ANY layer
+        RaycastHit2D hitAny = Physics2D.Raycast(origin, Vector2.down, dist, ~0);
+
+        Debug.DrawLine(origin, origin + Vector2.down * dist, Color.magenta);
+
+        if (hitAny.collider)
+        {
+            Debug.DrawLine(hitAny.point, hitAny.point + hitAny.normal * 0.5f, Color.green);
+            Debug.Log($"[ANY] Hit {hitAny.collider.name} layer={hitAny.collider.gameObject.layer} isTrigger={hitAny.collider.isTrigger}");
+        }
+        else
+        {
+            Debug.LogWarning("[ANY] Raycast hit NOTHING (even with ~0 mask). Floor collider disabled/inactive or not 2D?");
+        }
+
+        // Hit ONLY your solidMask
+        RaycastHit2D hitSolid = Physics2D.Raycast(origin, Vector2.down, dist, solidMask);
+        Debug.DrawLine(origin, origin + Vector2.down * dist, Color.cyan);
+
+        if (hitSolid.collider)
+        {
+            Debug.DrawLine(hitSolid.point, hitSolid.point + hitSolid.normal * 0.5f, Color.yellow);
+            Debug.Log($"[SOLID] Hit {hitSolid.collider.name} layer={hitSolid.collider.gameObject.layer}");
+        }
+        else
+        {
+            Debug.LogWarning($"[SOLID] Raycast hit NOTHING. solidMask.value={solidMask.value}");
+        }
     }
 
     public void SetVerticalVelocity(float vy) => Velocity = new Vector2(Velocity.x, vy);
@@ -162,118 +208,98 @@ public class ECBMotor2D : MonoBehaviour
 
     void Tick(float dt)
     {
-        DepenetrateFromSolids();
+        //DepenetrateFromSolids();
 
         ApplyMovingPlatformMotion(dt);
-        // Timers
+
         if (dropTimer > 0f) dropTimer -= dt;
 
-        // Gravity
-        if(!DisableGravity)
+        if (!DisableGravity)
         {
             float vy = Velocity.y - gravity * dt;
             if (vy < -maxFallSpeed) vy = -maxFallSpeed;
             Velocity = new Vector2(Velocity.x, vy);
         }
-        
+
         if (Grounded && Velocity.y <= 0.01f)
         {
             Velocity = new Vector2(Velocity.x, -groundStickVelocity);
         }
-        // Move: resolve axis separately for predictability (platform-fighter style)
+
         Vector2 delta = Velocity * dt;
+
         if (useSlopeTangent && Grounded && Velocity.y <= 0.01f)
         {
             Vector2 tangent = GetGroundTangent();
-
-            // take intended horizontal displacement and move it along the slope
             Vector2 slopeMove = tangent * (delta.x);
 
-            if (Mathf.Abs(slopeMove.x) > 0f || Mathf.Abs(slopeMove.y) > 0f)
+            if (slopeMove != Vector2.zero)
                 MoveAndCollide(slopeMove, axisIsVertical: false);
 
-            // then apply remaining vertical (usually just the small stick velocity)
             if (Mathf.Abs(delta.y) > 0f)
                 MoveAndCollide(new Vector2(0f, delta.y), axisIsVertical: true);
         }
         else
         {
-        // Horizontal
-        if (Mathf.Abs(delta.x) > 0f)
-            MoveAndCollide(new Vector2(delta.x, 0f), axisIsVertical: false);
+            if (Mathf.Abs(delta.x) > 0f)
+                MoveAndCollide(new Vector2(delta.x, 0f), axisIsVertical: false);
 
-        // Vertical (handles landing / head bonk)
-        if (Mathf.Abs(delta.y) > 0f)
-            MoveAndCollide(new Vector2(0f, delta.y), axisIsVertical: true);
+            if (Mathf.Abs(delta.y) > 0f)
+                MoveAndCollide(new Vector2(0f, delta.y), axisIsVertical: true);
         }
-        
-        // Ground check + snap
+
         UpdateGroundedAndSnap();
-        // After grounding is updated, preserve platform momentum if we just left the ground
+
         if (preservePlatformMomentum)
         {
             bool justLeftGround = (wasGroundedLastFrame && !Grounded);
-
             if (justLeftGround)
-            {
-                // Add platform velocity once so it carries into the air
                 Velocity += lastPlatformVelocity;
-            }
         }
 
-        // Store for next frame
         wasGroundedLastFrame = Grounded;
     }
 
     void MoveAndCollide(Vector2 move, bool axisIsVertical)
     {
+        SyncDiamondCollider();
+
         Vector2 startPos = transform.position;
-        Vector2 center = (Vector2)startPos + ecbOffset;
-
         float distance = move.magnitude;
-        Vector2 dir = move.normalized;
+        if (distance <= 0f) return;
 
-        // Decide which layers we collide with for this move
+        Vector2 dir = move / distance;
+
+        // Build collision mask for this move
         LayerMask mask = solidMask;
 
-        // Only consider platforms when moving DOWN and not dropping through
         bool movingDown = axisIsVertical && dir.y < 0f;
         if (movingDown)
         {
-            // Always land on "one-way but NOT droppable" platforms while falling
             mask |= oneWayNoDropMask;
 
-            // Only land on droppable platforms if not currently dropping through
             if (dropTimer <= 0f)
                 mask |= platformMask;
         }
 
-        // Then only gate platformMask by dropTimer:
         if (dropTimer > 0f)
             mask &= ~platformMask;
 
-        // Cast ECB box
-        RaycastHit2D hit = Physics2D.BoxCast(
-            center,
-            ecbSize,
-            0f,
-            dir,
-            distance + skin,
-            mask
-        );
-
-        if (!hit)
+        // --- KITE CAST (ignores sibling colliders) ---
+        if (!KiteCast(dir, distance + skin, mask, out RaycastHit2D hit))
         {
+            // No collision: move freely
             transform.position = (Vector3)startPos + (Vector3)move;
             return;
         }
 
-        // If the hit was a platform, validate one-way rules
+        // Platform one-way validation (only relevant if we actually hit a platform)
         if (((1 << hit.collider.gameObject.layer) & platformMask) != 0)
         {
-            if (!IsValidPlatformHit(hit, center))
+            Vector2 ecbCenter = (Vector2)startPos + ecbOffset;
+            if (!IsValidPlatformHit(hit, ecbCenter))
             {
-                // Ignore this platform hit: move fully.
+                // Ignore this platform hit: move fully
                 transform.position = (Vector3)startPos + (Vector3)move;
                 return;
             }
@@ -286,44 +312,33 @@ public class ECBMotor2D : MonoBehaviour
 
         // Resolve velocity (stop into surface)
         if (axisIsVertical)
-        {
-            // If we hit something while moving up/down, zero Y velocity
             Velocity = new Vector2(Velocity.x, 0f);
-        }
         else
-        {
             Velocity = new Vector2(0f, Velocity.y);
-        }
     }
 
     bool IsValidPlatformHit(RaycastHit2D hit, Vector2 ecbCenter)
-{
-    // Only treat as one-way ground if we're moving downward or basically not going up
-    if (Velocity.y > 0.01f)
-        return false;
+    {
+        if (Velocity.y > 0.01f)
+            return false;
 
-    // Must be mostly upward-facing (works for slopes too)
-    if (hit.normal.y < minGroundNormalY)
-        return false;
+        if (hit.normal.y < minGroundNormalY)
+            return false;
 
-    // Use the contact point (local surface height), NOT bounds.max.y (which breaks on slopes)
-    float surfaceY = hit.point.y;
+        float surfaceY = hit.point.y;
+        float ecbBottomY = ecbCenter.y - ECBHalfHeight;
 
-    // ECB bottom BEFORE moving
-    float ecbBottomY = ecbCenter.y - ECBHalfHeight;
+        const float tolerance = 0.02f;
+        if (ecbBottomY < surfaceY - tolerance)
+            return false;
 
-    // Only land if bottom is above (or very slightly above) the surface at the contact point
-    const float tolerance = 0.02f; // tweak if needed
-    if (ecbBottomY < surfaceY - tolerance)
-        return false;
-
-    return true;
-}
-
-    private static bool LayerInMask(int layer, LayerMask mask) => (mask.value & (1 << layer)) != 0;
+        return true;
+    }
 
     private void UpdateGroundedAndSnap()
     {
+        SyncDiamondCollider();
+
         if (Velocity.y > 0.01f)
         {
             Grounded = false;
@@ -334,86 +349,73 @@ public class ECBMotor2D : MonoBehaviour
             PlatformVelocity = Vector2.zero;
             return;
         }
+
         bool allowSnap = Velocity.y <= 0.01f;
-        Vector2 pos = transform.position; 
-        Vector2 center = pos + ecbOffset; 
-        // Ground probe: short cast downward 
-        LayerMask mask = solidMask; 
-        // Only consider one-way surfaces when not moving upward \
-        if (Velocity.y <= 0.01f) { 
-            // Always consider non-droppable one-ways for grounding 
-            mask |= oneWayNoDropMask; 
-            // Consider droppable platforms only if not dropping through 
-            if (dropTimer <= 0f) mask |= platformMask; 
-        } 
-        RaycastHit2D hit = Physics2D.BoxCast( center, ecbSize, 0f, Vector2.down, groundSnapDistance + skin, mask ); 
-        
-        // if (hit) {
-        //     Debug.Log($"Ground probe hit {hit.collider.name} dist={hit.distance:F3} normal={hit.normal} layer={hit.collider.gameObject.layer}");
-        // } else {
-        //     Debug.Log("Ground probe: no hit");
-        // }
 
-        if (hit) { 
-            // Platform filtering 
-            if (((1 << hit.collider.gameObject.layer) & platformMask) != 0) { 
-                if (!IsValidPlatformHit(hit, center)) { 
-                    Grounded = false; 
-                    GroundNormal = Vector2.up; 
-                    
-                    groundCollider = null;
-                    groundBody = null;
-                    PlatformVelocity = Vector2.zero;
-                    return; 
-                } } 
-                bool isGround = hit.normal.y >= minGroundNormalY; 
-                if (isGround) { 
-                     // Key change: don't "re-ground" and snap while rising
-                    Grounded = allowSnap;
-                    GroundNormal = hit.normal;
+        LayerMask mask = solidMask;
 
-                    if (Grounded)
-                        {
-                            groundCollider = hit.collider;
-                            groundBody = hit.rigidbody;
+        if (Velocity.y <= 0.01f)
+        {
+            mask |= oneWayNoDropMask;
+            if (dropTimer <= 0f) mask |= platformMask;
+        }
 
-                            // Initialize last position when we land (prevents 1-frame pop)
-                            if (groundBody != null)
-                                lastGroundBodyPos = groundBody.position;
-                            else
-                                lastGroundBodyPos = groundCollider.transform.position;
-                        }
-                    // Snap down (prevents hovering) ONLY when not moving upward
-                    if (allowSnap)
-                    {
-                        float snap = Mathf.Max(0f, hit.distance - skin);
-                        if (snap > 0f)
-                            transform.position = (Vector3)(pos + Vector2.down * snap);
-                    }
-                    // If grounded, don’t keep accumulating downward velocity
-                    if (Grounded && Velocity.y < 0f)
-                        Velocity = new Vector2(Velocity.x, 0f);
-                    return; 
-                } 
-            } 
-            Grounded = false; 
+        if (!KiteCast(Vector2.down, groundSnapDistance + skin, mask, out RaycastHit2D best))
+        {
+            Grounded = false;
             GroundNormal = Vector2.up;
-
             groundCollider = null;
             groundBody = null;
             PlatformVelocity = Vector2.zero;
-            
-    }
-    private Vector2 GetGroundTangent()
-    {
-        // Perpendicular to normal (points "along" the surface)
-        Vector2 t = new Vector2(GroundNormal.y, -GroundNormal.x);
-        return t.normalized;
+            return;
+        }
+
+        DebugDrawKiteCast(Vector2.down, groundSnapDistance + skin, 1);
+
+        // Now continue grounding logic using "best"
+        bool isGround = best.normal.y >= minGroundNormalY;
+
+        if (isGround)
+        {
+            Grounded = allowSnap;
+            GroundNormal = best.normal;
+
+            if (Grounded)
+            {
+                groundCollider = best.collider;
+                groundBody = best.rigidbody;
+
+                if (groundBody != null)
+                    lastGroundBodyPos = groundBody.position;
+                else
+                    lastGroundBodyPos = groundCollider.transform.position;
+            }
+
+            if (allowSnap)
+            {
+                float snap = Mathf.Max(0f, best.distance - skin);
+                if (snap > 0f)
+                    transform.position += (Vector3)(Vector2.down * snap);
+            }
+
+            if (Grounded && Velocity.y < 0f)
+                Velocity = new Vector2(Velocity.x, 0f);
+
+            return;
+            }
+        
+
+        Grounded = false;
+        GroundNormal = Vector2.up;
+        groundCollider = null;
+        groundBody = null;
+        PlatformVelocity = Vector2.zero;
     }
 
-    private static Vector2 ProjectOn(Vector2 v, Vector2 dirNormalized)
+    private Vector2 GetGroundTangent()
     {
-        return dirNormalized * Vector2.Dot(v, dirNormalized);
+        Vector2 t = new Vector2(GroundNormal.y, -GroundNormal.x);
+        return t.normalized;
     }
 
     private void ApplyMovingPlatformMotion(float dt)
@@ -431,31 +433,40 @@ public class ECBMotor2D : MonoBehaviour
             return;
         }
 
-        // Where is the platform now?
-        Vector2 currentPos;
+        Vector2 currentPos = (groundBody != null)
+            ? groundBody.position
+            : (Vector2)groundCollider.transform.position;
 
-        if (groundBody != null)
-            currentPos = groundBody.position;
-        else
-            currentPos = (Vector2)groundCollider.transform.position;
-
-        // How far did it move since last frame?
         Vector2 delta = currentPos - lastGroundBodyPos;
 
-        // Move the player by the platform's delta
         if (delta != Vector2.zero)
             transform.position += (Vector3)delta;
 
-        // Expose velocity for other systems (optional)
         PlatformVelocity = (dt > 0f) ? (delta / dt) : Vector2.zero;
 
-        // Store for next frame
         lastPlatformVelocity = PlatformVelocity;
         lastGroundBodyPos = currentPos;
     }
+
     public void InheritPlatformVelocityOnce()
     {
         Velocity += lastPlatformVelocity * preservedPerc;
+    }
+    private ContactFilter2D BuildFilter(LayerMask mask)
+    {
+        ContactFilter2D f = new ContactFilter2D();
+        f.useLayerMask = true;
+        f.layerMask = mask;
+
+        // Don’t accidentally filter out everything
+        f.useDepth = false;
+        f.useNormalAngle = false;
+    
+
+        // Safe: allows hitting trigger colliders if any exist
+        f.useTriggers = true;
+
+        return f;
     }
 
     void OnDrawGizmosSelected()
@@ -464,10 +475,104 @@ public class ECBMotor2D : MonoBehaviour
 
         Vector2 center = (Vector2)transform.position + ecbOffset;
 
+        // Draw diamond wire
+        Vector2 top    = center + new Vector2(0f,  ECBHalfHeight);
+        Vector2 right  = center + new Vector2( ECBHalfWidth, 0f);
+        Vector2 bottom = center + new Vector2(0f, -ECBHalfHeight);
+        Vector2 left   = center + new Vector2(-ECBHalfWidth, 0f);
+
         Gizmos.color = Grounded ? Color.green : Color.yellow;
-        Gizmos.DrawWireCube(center, ecbSize);
+        Gizmos.DrawLine(top, right);
+        Gizmos.DrawLine(right, bottom);
+        Gizmos.DrawLine(bottom, left);
+        Gizmos.DrawLine(left, top);
 
         Gizmos.color = Color.cyan;
         Gizmos.DrawLine(center, center + Vector2.down * (groundSnapDistance + skin));
     }
+
+    private void DebugDrawKiteCast(Vector2 dir, float distance, int hitCount)
+{
+    if (!debugCast || !ecbQueryCollider) return;
+
+    Vector2 center = (Vector2)transform.position + ecbOffset;
+
+    float halfW = ECBHalfWidth;
+    float halfH = ECBHalfHeight;
+
+    // Kite corners at start
+    Vector2 top    = center + new Vector2(0, halfH);
+    Vector2 right  = center + new Vector2(halfW, 0);
+    Vector2 bottom = center + new Vector2(0, -halfH);
+    Vector2 left   = center + new Vector2(-halfW, 0);
+
+    Debug.DrawLine(top, right, castColor);
+    Debug.DrawLine(right, bottom, castColor);
+    Debug.DrawLine(bottom, left, castColor);
+    Debug.DrawLine(left, top, castColor);
+
+    // Draw cast direction
+    Debug.DrawLine(center, center + dir * distance, Color.cyan);
+
+    // Draw kite at end position (max cast distance)
+    Vector2 endOffset = dir * distance;
+    Debug.DrawLine(top + endOffset, right + endOffset, castColor);
+    Debug.DrawLine(right + endOffset, bottom + endOffset, castColor);
+    Debug.DrawLine(bottom + endOffset, left + endOffset, castColor);
+    Debug.DrawLine(left + endOffset, top + endOffset, castColor);
+
+    // If we hit something, draw hit info
+    if (hitCount > 0)
+    {
+        RaycastHit2D hit = _castHits[0];
+
+        Debug.DrawLine(hit.point, hit.point + hit.normal * 0.5f, hitColor);
+        Debug.DrawRay(hit.centroid, hit.normal * 0.5f, hitColor);
+    }
+}
+private bool KiteCast(Vector2 dir, float distance, LayerMask mask, out RaycastHit2D bestHit)
+{
+    bestHit = default;
+
+    if (!ecbQueryCollider) return false;
+
+    // Keep our collider in sync (important if you change size/offset at runtime)
+    SyncDiamondCollider();
+
+    // Build a ContactFilter2D that exactly matches the desired mask and trigger behavior
+    ContactFilter2D filter = new ContactFilter2D();
+    filter.useLayerMask = true;
+    filter.layerMask = mask;
+    filter.useTriggers = false; // don't hit triggers for movement/grounding
+    filter.useDepth = false;
+    filter.useNormalAngle = false;
+
+    // Cast the polygon shape. This populates _castHits and returns number of hits
+    int hitCount = ecbQueryCollider.Cast(dir, filter, _castHits, distance);
+
+    if (hitCount <= 0) return false;
+
+    // Choose the closest valid hit (ignore the query collider / siblings)
+    float bestDist = float.PositiveInfinity;
+    bool found = false;
+
+    for (int i = 0; i < hitCount; i++)
+    {
+        var h = _castHits[i];
+        if (!h.collider) continue;
+
+        // Ignore hits on our own collider or any colliders belonging to the same root (optional)
+        if (h.collider == ecbQueryCollider) continue;
+        if (h.collider.transform.IsChildOf(transform)) continue;
+
+        if (h.distance < bestDist)
+        {
+            bestDist = h.distance;
+            bestHit = h;
+            found = true;
+        }
+    }
+
+    return found;
+}
 }

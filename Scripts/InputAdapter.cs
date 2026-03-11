@@ -6,7 +6,7 @@ using UnityEngine.VFX;
 
 public class InputAdapter : MonoBehaviour
 {
-    [SerializeField] private ECBMotor2D motor;
+    [SerializeField] private ECBMotor2D1 motor;
 
     [Header("Jump")]
     [SerializeField] private int jumpAmount = 2;     // total jumps (1 = no double jump, 2 = double jump)
