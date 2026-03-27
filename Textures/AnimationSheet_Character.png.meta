@@ -34,7 +34,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -1098,8 +1098,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: f66d9c39ead77df4e9891701eafebaed
-      internalID: -1974091291
+      spriteID: a3069a93aced7fb48942e4f118c96392
+      internalID: -1308587839
       vertices: []
       indices: 
       edges: []
@@ -1119,8 +1119,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 39589083be916574082f1db97dc69eef
-      internalID: -705476821
+      spriteID: 4fbdc03af9168504c954ad53a326e73f
+      internalID: 1789892349
       vertices: []
       indices: 
       edges: []
@@ -1140,8 +1140,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 67bd84a909cfe784e9a8ada7c0878478
-      internalID: -53721756
+      spriteID: b6e7e490a60619441bc28cad1795676c
+      internalID: -517142463
       vertices: []
       indices: 
       edges: []
@@ -1199,9 +1199,9 @@ TextureImporter:
       AnimationSheet_Character_44: -1729192640
       AnimationSheet_Character_45: 746641520
       AnimationSheet_Character_46: 2046211869
-      AnimationSheet_Character_47: -1974091291
-      AnimationSheet_Character_48: -705476821
-      AnimationSheet_Character_49: -53721756
+      AnimationSheet_Character_47: -1308587839
+      AnimationSheet_Character_48: 1789892349
+      AnimationSheet_Character_49: -517142463
       AnimationSheet_Character_5: -1289427737
       AnimationSheet_Character_6: 28283726
       AnimationSheet_Character_7: 1493705126

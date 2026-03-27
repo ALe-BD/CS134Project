@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.VFX;
@@ -37,6 +38,10 @@ public class InputAdapter : MonoBehaviour
     [SerializeField] private float dashCooldown = 0.25f;
     [SerializeField] private int maxAirDashes = 1;
 
+    [Header("Sprite")]
+    [SerializeField] private GameObject mainSpite;
+    
+
     private bool isDashing;
     private float dashTimer;
     private float dashCooldownTimer;
@@ -47,6 +52,7 @@ public class InputAdapter : MonoBehaviour
     private float lastGroundedTime = -999f;    // time we were last grounded
     private float lastJumpPressedTime = -999f; // time jump was last pressed (buffer)
     private int facingDirection = 1; // 1 = right, -1 = left
+    private SpriteRenderer spriteRenderer;
 
     public void OnMove(InputAction.CallbackContext ctx)
     {
@@ -80,6 +86,11 @@ public class InputAdapter : MonoBehaviour
     {
         if (!ctx.performed) return;
         motor.RequestDropThrough();
+    }
+
+    void Start()
+    {
+        spriteRenderer = mainSpite.GetComponent<SpriteRenderer>();    
     }
 
     void Update()
@@ -154,8 +165,14 @@ public class InputAdapter : MonoBehaviour
         float velocityChange = newVelocityX - currentVelocityX;
         motor.AddVelocity(new Vector2(velocityChange, 0f));
 
-        if (move.x > 0.1f) facingDirection = 1;
-        else if (move.x < -0.1f) facingDirection = -1;
+        if (move.x > 0.1f) {
+            facingDirection = 1;
+            spriteRenderer.flipX = !enabled;
+        }
+        else if (move.x < -0.1f) {
+            facingDirection = -1;
+            spriteRenderer.flipX = enabled;
+        }
     }
 
     void LateUpdate()
