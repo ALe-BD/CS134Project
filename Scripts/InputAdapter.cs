@@ -21,6 +21,7 @@ public class InputAdapter : MonoBehaviour
 
     [Header("Move")]
     [SerializeField] private float walkSpeed = 6.5f;
+    [SerializeField] private float runSpeed = 9.5f;
     private Vector2 move;
 
     [Header("Movement Acceleration")]
@@ -40,9 +41,20 @@ public class InputAdapter : MonoBehaviour
 
     [Header("Sprite")]
     [SerializeField] private GameObject mainSpite;
-    
+
+    private Animator _animator;
+
+    // animation IDs
+	private int _animIDSpeed;
+	private int _animIDGrounded;
+	private int _animIDJump;
+	private int _animIDFreeFall;
+	private int _animIDMotionSpeed;
+    private float _animationBlend;
+    private bool _hasAnimator;
 
     private bool isDashing;
+    private bool dashHeld;
     private float dashTimer;
     private float dashCooldownTimer;
     private Vector2 dashDirection;
@@ -62,24 +74,34 @@ public class InputAdapter : MonoBehaviour
     public void OnJump(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
-
+        
+        if (jumpCount < jumpAmount)
+        {
+            _animator.Play("Base Layer.PlayerJumpStart");
+        }
+        
         // Buffer the jump press; we'll attempt to consume it in Update after motor ticks.
         lastJumpPressedTime = Time.time;
     }
     public void OnDash(InputAction.CallbackContext ctx)
     {
+        // Hold-to-run state
+        if (ctx.started)
+            dashHeld = true;
+        else if (ctx.canceled)
+            dashHeld = false;
 
         if (!ctx.performed) return;
-            Debug.Log("Dashed");
+        Debug.Log("Dashed");
 
-            if (isDashing) return;
-            if (dashCooldownTimer > 0f) return;
+        if (isDashing) return;
+        if (dashCooldownTimer > 0f) return;
 
-            // Limit air dashes
-            if (!motor.Grounded && dashCount >= maxAirDashes)
-                return;
+        // Limit air dashes
+        if (!motor.Grounded && dashCount >= maxAirDashes)
+            return;
 
-            StartDash();
+        StartDash();
     }
 
     public void OnDrop(InputAction.CallbackContext ctx)
@@ -90,12 +112,23 @@ public class InputAdapter : MonoBehaviour
 
     void Start()
     {
-        spriteRenderer = mainSpite.GetComponent<SpriteRenderer>();    
+        spriteRenderer = mainSpite.GetComponent<SpriteRenderer>();  
+        _animator = mainSpite.GetComponent<Animator>();
+        AssignAnimationIDs();
+        
     }
+    private void AssignAnimationIDs()
+	{
+		_animIDSpeed = Animator.StringToHash("Speed");
+		_animIDGrounded = Animator.StringToHash("Grounded");
+		_animIDJump = Animator.StringToHash("Jump");
+		_animIDFreeFall = Animator.StringToHash("Freefall");
+		_animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
+	}
 
     void Update()
     {
-
+        _hasAnimator = _animator != null;
         // Update timers
         if (dashCooldownTimer > 0f)
             dashCooldownTimer -= Time.deltaTime;
@@ -127,7 +160,8 @@ public class InputAdapter : MonoBehaviour
         }
 
         // Determine max allowed speed
-        float maxSpeed = walkSpeed;
+        // Hold dash to run, but ONLY on ground.
+        float maxSpeed = (isGrounded && dashHeld) ? runSpeed : walkSpeed;
 
         if (!isGrounded)
         {
@@ -165,6 +199,11 @@ public class InputAdapter : MonoBehaviour
         float velocityChange = newVelocityX - currentVelocityX;
         motor.AddVelocity(new Vector2(velocityChange, 0f));
 
+        if (_hasAnimator)
+		{
+            _animator.SetFloat(_animIDSpeed, Mathf.Abs(motor.Velocity.x));
+		}
+
         if (move.x > 0.1f) {
             facingDirection = 1;
             spriteRenderer.flipX = !enabled;
@@ -173,6 +212,11 @@ public class InputAdapter : MonoBehaviour
             facingDirection = -1;
             spriteRenderer.flipX = enabled;
         }
+
+
+        _animator.SetBool(_animIDGrounded, isGrounded);
+        _animator.SetBool(_animIDFreeFall, !isGrounded);
+        
     }
 
     void LateUpdate()
