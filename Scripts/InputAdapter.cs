@@ -49,8 +49,6 @@ public class InputAdapter : MonoBehaviour
 	private int _animIDGrounded;
 	private int _animIDJump;
 	private int _animIDFreeFall;
-	private int _animIDMotionSpeed;
-    private float _animationBlend;
     private bool _hasAnimator;
 
     private bool isDashing;
@@ -123,7 +121,6 @@ public class InputAdapter : MonoBehaviour
 		_animIDGrounded = Animator.StringToHash("Grounded");
 		_animIDJump = Animator.StringToHash("Jump");
 		_animIDFreeFall = Animator.StringToHash("Freefall");
-		_animIDMotionSpeed = Animator.StringToHash("MotionSpeed");
 	}
 
     void Update()
@@ -272,7 +269,34 @@ public class InputAdapter : MonoBehaviour
         isDashing = true;
         dashTimer = dashDuration;
         dashCooldownTimer = dashCooldown;
-        
+
+        if (move != Vector2.zero)
+        {
+            float angle = Mathf.Atan2(move.y, move.x) * Mathf.Rad2Deg;
+            Debug.Log("angle: " + angle);
+
+            if (angle > 90f || angle < -90f)
+            {
+                mainSpite.transform.eulerAngles = new Vector3(0f, 0f, angle + 180f);
+                Debug.Log("ping1");
+            }
+            else
+            {
+                if(!Mathf.Approximately(angle, 90f) || !Mathf.Approximately(angle, -90f))
+                {
+                    mainSpite.transform.eulerAngles = new Vector3(0f, 0f, angle);
+                    Debug.Log("ping2_1");
+                }
+                if((Mathf.Approximately(angle, 90f) || Mathf.Approximately(angle, -90f)) && facingDirection == -1)
+                {
+                    mainSpite.transform.eulerAngles = new Vector3(0f, 0f, angle + 180f);
+                    Debug.Log("ping2_2");
+                }
+                
+                
+            }
+        }
+
         if (!motor.Grounded)
         {
             dashCount++;  
@@ -295,6 +319,7 @@ public class InputAdapter : MonoBehaviour
 
         if (dashTimer <= 0f)
         {
+            mainSpite.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             isDashing = false;
         }
     }
