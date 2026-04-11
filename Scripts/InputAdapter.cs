@@ -51,6 +51,7 @@ public class InputAdapter : MonoBehaviour
 	private int _animIDFreeFall;
     private bool _hasAnimator;
 
+    // dash variables
     private bool isDashing;
     private bool dashHeld;
     private float dashTimer;
@@ -58,6 +59,7 @@ public class InputAdapter : MonoBehaviour
     private Vector2 dashDirection;
     private int dashCount;
 
+    // jump variables
     private int jumpCount = 1;                 // 1 means "used ground jump already?" (see resets below)
     private float lastGroundedTime = -999f;    // time we were last grounded
     private float lastJumpPressedTime = -999f; // time jump was last pressed (buffer)
@@ -115,14 +117,6 @@ public class InputAdapter : MonoBehaviour
         AssignAnimationIDs();
         
     }
-    private void AssignAnimationIDs()
-	{
-		_animIDSpeed = Animator.StringToHash("Speed");
-		_animIDGrounded = Animator.StringToHash("Grounded");
-		_animIDJump = Animator.StringToHash("Jump");
-		_animIDFreeFall = Animator.StringToHash("Freefall");
-	}
-
     void Update()
     {
         _hasAnimator = _animator != null;
@@ -136,10 +130,40 @@ public class InputAdapter : MonoBehaviour
             return; // skip normal movement while dashing
         }
 
-        // Horizontal drive
-
         // Determine if grounded
         bool isGrounded = motor.Grounded;
+
+        HoriDriver(isGrounded);
+        UpdateFacing();
+
+        _animator.SetBool(_animIDGrounded, isGrounded);
+        _animator.SetBool(_animIDFreeFall, !isGrounded);
+
+    }
+
+    void LateUpdate()
+    {
+        Jump();
+        // Update grounded timestamp AFTER motor.Update() has run this frame.
+        if (motor.Grounded)
+        {
+            lastGroundedTime = Time.time;
+            jumpCount = 1; // reset air-jump state when on ground
+            dashCount = 0;
+        }
+    }
+
+    private void AssignAnimationIDs()
+	{
+		_animIDSpeed = Animator.StringToHash("Speed");
+		_animIDGrounded = Animator.StringToHash("Grounded");
+		_animIDJump = Animator.StringToHash("Jump");
+		_animIDFreeFall = Animator.StringToHash("Freefall");
+	}
+
+    private void HoriDriver(bool isGrounded)
+    {
+        // Horizontal drive
 
         // Choose acceleration and deceleration
         float acceleration;
@@ -201,30 +225,18 @@ public class InputAdapter : MonoBehaviour
             _animator.SetFloat(_animIDSpeed, Mathf.Abs(motor.Velocity.x));
 		}
 
-        if (move.x > 0.1f) {
+    }
+    private void UpdateFacing()
+    {
+        if (move.x > 0.1f)
+        {
             facingDirection = 1;
             spriteRenderer.flipX = !enabled;
         }
-        else if (move.x < -0.1f) {
+        else if (move.x < -0.1f)
+        {
             facingDirection = -1;
             spriteRenderer.flipX = enabled;
-        }
-
-
-        _animator.SetBool(_animIDGrounded, isGrounded);
-        _animator.SetBool(_animIDFreeFall, !isGrounded);
-        
-    }
-
-    void LateUpdate()
-    {
-        Jump();
-        // Update grounded timestamp AFTER motor.Update() has run this frame.
-        if (motor.Grounded)
-        {
-            lastGroundedTime = Time.time;
-            jumpCount = 1; // reset air-jump state when on ground
-            dashCount = 0;
         }
     }
 
