@@ -40,7 +40,7 @@ public class InputAdapter : MonoBehaviour
     [SerializeField] private int maxAirDashes = 1;
 
     [Header("Sprite")]
-    [SerializeField] private GameObject mainSpite;
+    [SerializeField] private GameObject mainSprite;
 
     private Animator _animator;
 
@@ -65,6 +65,10 @@ public class InputAdapter : MonoBehaviour
     private float lastJumpPressedTime = -999f; // time jump was last pressed (buffer)
     private int facingDirection = 1; // 1 = right, -1 = left
     private SpriteRenderer spriteRenderer;
+
+    // private GhostSprites ghost;
+
+    private SpriteSpawner ghost;
 
     public void OnMove(InputAction.CallbackContext ctx)
     {
@@ -112,17 +116,20 @@ public class InputAdapter : MonoBehaviour
 
     void Start()
     {
-        spriteRenderer = mainSpite.GetComponent<SpriteRenderer>();  
-        _animator = mainSpite.GetComponent<Animator>();
+        spriteRenderer = mainSprite.GetComponent<SpriteRenderer>();  
+        _animator = mainSprite.GetComponent<Animator>();
+        ghost = mainSprite.GetComponent<SpriteSpawner>();
+        ghost.enabled = false;
         AssignAnimationIDs();
-        
     }
     void Update()
     {
         _hasAnimator = _animator != null;
         // Update timers
         if (dashCooldownTimer > 0f)
+        {
             dashCooldownTimer -= Time.deltaTime;
+        }
 
         if (isDashing)
         {
@@ -132,6 +139,11 @@ public class InputAdapter : MonoBehaviour
 
         // Determine if grounded
         bool isGrounded = motor.Grounded;
+
+        if (isGrounded)
+        {
+            ghost.enabled = false;
+        }
 
         HoriDriver(isGrounded);
         UpdateFacing();
@@ -281,6 +293,8 @@ public class InputAdapter : MonoBehaviour
         isDashing = true;
         dashTimer = dashDuration;
         dashCooldownTimer = dashCooldown;
+        // ghost.trailSize = 10;
+        ghost.enabled = true;
 
         if (move != Vector2.zero)
         {
@@ -289,19 +303,19 @@ public class InputAdapter : MonoBehaviour
 
             if (angle > 90f || angle < -90f)
             {
-                mainSpite.transform.eulerAngles = new Vector3(0f, 0f, angle + 180f);
+                mainSprite.transform.eulerAngles = new Vector3(0f, 0f, angle + 180f);
                 Debug.Log("ping1");
             }
             else
             {
                 if(!Mathf.Approximately(angle, 90f) || !Mathf.Approximately(angle, -90f))
                 {
-                    mainSpite.transform.eulerAngles = new Vector3(0f, 0f, angle);
+                    mainSprite.transform.eulerAngles = new Vector3(0f, 0f, angle);
                     Debug.Log("ping2_1");
                 }
                 if((Mathf.Approximately(angle, 90f) || Mathf.Approximately(angle, -90f)) && facingDirection == -1)
                 {
-                    mainSpite.transform.eulerAngles = new Vector3(0f, 0f, angle + 180f);
+                    mainSprite.transform.eulerAngles = new Vector3(0f, 0f, angle + 180f);
                     Debug.Log("ping2_2");
                 }
                 
@@ -331,7 +345,7 @@ public class InputAdapter : MonoBehaviour
 
         if (dashTimer <= 0f)
         {
-            mainSpite.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+            mainSprite.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             isDashing = false;
         }
     }
