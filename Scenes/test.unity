@@ -905,7 +905,7 @@ MonoBehaviour:
   dashDuration: 0.18
   dashCooldown: 0.25
   maxAirDashes: 1
-  mainSpite: {fileID: 1450640334}
+  mainSprite: {fileID: 1450640334}
 --- !u!114 &540535140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6537,6 +6537,37 @@ Transform:
   - {fileID: 210276037}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1191751857
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1191751858}
+  m_Layer: 0
+  m_Name: DashTrail
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1191751858
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1191751857}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -2.1224937, y: 7.9500637, z: 0.11607413}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1389165717
 GameObject:
   m_ObjectHideFlags: 0
@@ -6749,6 +6780,7 @@ GameObject:
   - component: {fileID: 1450640335}
   - component: {fileID: 1450640336}
   - component: {fileID: 1450640337}
+  - component: {fileID: 1450640338}
   m_Layer: 0
   m_Name: Isometric Diamond
   m_TagString: Untagged
@@ -6844,6 +6876,25 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &1450640338
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1450640334}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 842c7021e3f58854e901eafac6e91cb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  spawnInterval: 0.1
+  spawnOffset: {x: 0, y: 0, z: 0.1}
+  fadeTime: 2
+  parentObject: {fileID: 1191751858}
+  color:
+    serializedVersion: 2
+    rgba: 2315256063
 --- !u!1 &1468745534
 GameObject:
   m_ObjectHideFlags: 0
@@ -7401,7 +7452,7 @@ MonoBehaviour:
   dashDuration: 0.18
   dashCooldown: 0.25
   maxAirDashes: 1
-  mainSpite: {fileID: 0}
+  mainSprite: {fileID: 0}
 --- !u!114 &2080942645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7757,3 +7808,4 @@ SceneRoots:
   - {fileID: 1675037647}
   - {fileID: 303122977}
   - {fileID: 918498209}
+  - {fileID: 1191751858}
