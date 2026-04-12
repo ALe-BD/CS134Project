@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="42c49d94-e4b1-4a1f-8d2d-80ee2febd966" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Scenes/test.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Scenes/test.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Scripts/enemyPatrol.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Scripts/enemyPatrol.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Textures/Enemy/Idle.anim" beforeDir="false" afterPath="$PROJECT_DIR$/Textures/Enemy/Idle.anim" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Textures/Enemy/Mushroom-Idle.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Textures/Enemy/Mushroom-Idle.png.meta" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Textures/Enemy/Mushroom-Run.png.meta" beforeDir="false" afterPath="$PROJECT_DIR$/Textures/Enemy/Mushroom-Run.png.meta" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Scripts/ECBMotor2D.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Scripts/enemyPatrol.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "git-widget-placeholder": "Debug"
+  }
+}]]></component>
+  <component name="TaskManager">
+    <servers />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
+</project>
