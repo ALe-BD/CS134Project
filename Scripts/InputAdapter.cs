@@ -49,6 +49,7 @@ public class InputAdapter : MonoBehaviour
 	private int _animIDGrounded;
 	private int _animIDJump;
 	private int _animIDFreeFall;
+    private int _animIDDashing;
     private bool _hasAnimator;
 
     // dash variables
@@ -96,6 +97,11 @@ public class InputAdapter : MonoBehaviour
             dashHeld = false;
 
         if (!ctx.performed) return;
+
+        if (dashCount < maxAirDashes)
+        {
+            _animator.Play("Base Layer.PlayerDash");
+        }
         Debug.Log("Dashed");
 
         if (isDashing) return;
@@ -131,6 +137,7 @@ public class InputAdapter : MonoBehaviour
             dashCooldownTimer -= Time.deltaTime;
         }
 
+        _animator.SetBool(_animIDDashing, isDashing);
         if (isDashing)
         {
             Dash();
@@ -171,6 +178,7 @@ public class InputAdapter : MonoBehaviour
 		_animIDGrounded = Animator.StringToHash("Grounded");
 		_animIDJump = Animator.StringToHash("Jump");
 		_animIDFreeFall = Animator.StringToHash("Freefall");
+        _animIDDashing = Animator.StringToHash("Dashing");
 	}
 
     private void HoriDriver(bool isGrounded)
