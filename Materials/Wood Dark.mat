@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Wood Dark
-  m_Shader: {fileID: -6465566751694194690, guid: d7654cb63a9554f4f91bc040cd51753d, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: f6d97dbb164579c44a7e591116033c1e, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -52,5 +52,5 @@ Material:
     - _CurrRow: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _Grid: {r: 1, g: 1, b: 0, a: 0}
+    - _Grid: {r: 5, g: 5, b: 0, a: 0}
   m_BuildTextureStacks: []
