@@ -4,10 +4,24 @@ using UnityEngine;
 
 public class HealthManager : MonoBehaviour
 {
-    [SerializeField] GameObject HealthBar;
+    [SerializeField] private GameObject HealthBar;
+    [SerializeField] private Material HealthMaterial;
+    [SerializeField] private float Radius = 0.2f;
+    [SerializeField] private float LineWidth = 0.25f;
+    [SerializeField] private Color Color;
+    [SerializeField] private float Rotation = 0;
+    [SerializeField] private float RemovedSegments = 0;
+    [SerializeField] private float SegmentSpacing = 0.02f;
+    [SerializeField] private float SegmentCount = 6;
+
+    private Coroutine fadeRoutine;
+    [SerializeField] private float fadeDuration = 2f;
+
 
     [SerializeField, TextArea]
     private string DEBUG_String;
+
+    
 
     // Start is called before the first frame update
     void Start()
@@ -19,16 +33,90 @@ public class HealthManager : MonoBehaviour
             DEBUG_String = this + "ping";
         }
 
+        HealthMaterial = HealthBar.GetComponent<Renderer>().material;
+        HealthMaterial.SetFloat("_Radius", Radius);
+        HealthMaterial.SetFloat("_LineWidth", LineWidth);
+        HealthMaterial.SetFloat("_Rotation", Rotation);
+        HealthMaterial.SetFloat("_RemoveSegments", RemovedSegments);
+        HealthMaterial.SetFloat("_SegmentSpacing", SegmentSpacing);
+        HealthMaterial.SetFloat("_SegmentCount", SegmentCount);
+
+        Color = HealthMaterial.GetColor("_Color");
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.I))
+            StartFadeOut();
+
+        if (Input.GetKeyDown(KeyCode.O))
+            StartFadeIn();
+
+        if (Input.GetKeyDown(KeyCode.R))
+            Damaged(2);
+        if (Input.GetKeyDown(KeyCode.T))
+            Healed(1);
     }
 
-    public void Damaged()
+
+    public void Damaged(int damagePoints)
     {
-        
+        RemovedSegments += damagePoints;
+        RemovedSegments = Mathf.Clamp(RemovedSegments, 0, SegmentCount);
+        HealthMaterial.SetFloat("_RemoveSegments", RemovedSegments);
+    }
+
+    public void Healed(int healPoints)
+    {
+        RemovedSegments -= healPoints;
+        RemovedSegments = Mathf.Clamp(RemovedSegments, 0, SegmentCount);
+        HealthMaterial.SetFloat("_RemoveSegments", RemovedSegments);
+    }
+
+    public void StartFadeOut()
+    {
+        StartFadeTo(0f);
+    }
+
+    public void StartFadeIn()
+    {
+        StartFadeTo(1f);
+    }
+
+    private void StartFadeTo(float targetAlpha)
+    {
+        if (fadeRoutine != null)
+            StopCoroutine(fadeRoutine);
+
+        fadeRoutine = StartCoroutine(FadeToRoutine(targetAlpha, fadeDuration));
+    }
+
+    private IEnumerator FadeToRoutine(float targetAlpha, float fullDuration)
+    {
+        float startAlpha = Color.a;
+        float alphaDistance = Mathf.Abs(targetAlpha - startAlpha);
+
+        if (alphaDistance <= 0.001f)
+        {
+            Color.a = targetAlpha;
+            HealthMaterial.SetColor("_Color", Color);
+            fadeRoutine = null;
+            yield break;
+        }
+
+        float adjustedDuration = fullDuration * alphaDistance;
+        float elapsed = 0f;
+
+        while (elapsed < adjustedDuration)
+        {
+            elapsed += Time.deltaTime;
+            Color.a = Mathf.Lerp(startAlpha, targetAlpha, elapsed / adjustedDuration);
+            HealthMaterial.SetColor("_Color", Color);
+            yield return null;
+        }
+
+        Color.a = targetAlpha;
+        HealthMaterial.SetColor("_Color", Color);
+        fadeRoutine = null;
     }
 }

@@ -33,12 +33,13 @@ Material:
     - _BUILTIN_QueueOffset: 0
     - _LineWidth: 0.25
     - _Radius: 0.19
+    - _RemoveSegments: 0.15
     - _RemovedSegments: 0
     - _Rotation: 0
     - _SegmentCount: 6
     - _SegmentSpacing: 0.02
     m_Colors:
-    - _Color: {r: 1, g: 0.5688233, b: 0, a: 0}
+    - _Color: {r: 1, g: 0.5688233, b: 0, a: 1}
   m_BuildTextureStacks: []
 --- !u!114 &84924067252991088
 MonoBehaviour:
