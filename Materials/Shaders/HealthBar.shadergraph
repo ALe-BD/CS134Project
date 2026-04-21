@@ -4170,11 +4170,11 @@
     "m_Guid": {
         "m_GuidSerialized": "9e9acfc9-05df-4a9e-bfa9-497dfb63fc50"
     },
-    "m_Name": "RemovedSegments",
+    "m_Name": "RemoveSegments",
     "m_DefaultRefNameVersion": 1,
-    "m_RefNameGeneratedByDisplayName": "RemovedSegments",
-    "m_DefaultReferenceName": "_RemovedSegments",
-    "m_OverrideReferenceName": "",
+    "m_RefNameGeneratedByDisplayName": "RemoveSegments",
+    "m_DefaultReferenceName": "_RemoveSegments",
+    "m_OverrideReferenceName": "_RemoveSegments",
     "m_GeneratePropertyBlock": true,
     "m_UseCustomSlotLabel": false,
     "m_CustomSlotLabel": "",
@@ -4470,7 +4470,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "92d6ff0e38cb4089bd15fa9442c3862a",
     "m_Id": 0,
-    "m_DisplayName": "RemovedSegments",
+    "m_DisplayName": "RemoveSegments",
     "m_SlotType": 1,
     "m_Hidden": false,
     "m_ShaderOutputName": "Out",
@@ -4871,8 +4871,8 @@
     "m_ObjectId": "9d1f40857a4444fc805287dcc041b77f",
     "m_Title": "Half Segment",
     "m_Position": {
-        "x": 841.5999755859375,
-        "y": 1351.9998779296875
+        "x": 842.0,
+        "y": 1352.0
     }
 }
 
@@ -7008,8 +7008,8 @@
     "m_ObjectId": "fed27010252e4d868d0b27b7644ec345",
     "m_Title": "Segment Size",
     "m_Position": {
-        "x": 278.79998779296877,
-        "y": 1130.7999267578125
+        "x": 279.0,
+        "y": 1130.5
     }
 }
 
