@@ -1881,13 +1881,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HealthBar: {fileID: 0}
   DEBUG_String: 
-  SegmentCount: 5
-  RemovedSegments: 0
-  Spacing: 0.04
-  Color: {r: 0, g: 0, b: 0, a: 0}
-  Radius: 0.4
-  LineWidth: 0.04
-  Rotation: 0
 --- !u!1 &592656959
 GameObject:
   m_ObjectHideFlags: 0
