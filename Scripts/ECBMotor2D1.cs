@@ -48,6 +48,11 @@ public class ECBMotor2D1 : MonoBehaviour
 
     [Header("Debug")]
     public bool drawGizmos = true;
+    public bool isDebug = true;
+    
+    [SerializeField, TextArea]
+    private string DEBUG_String;
+
 
     // Public state
     public Vector2 Velocity { get; private set; }
@@ -150,6 +155,10 @@ public class ECBMotor2D1 : MonoBehaviour
     void Update()
     {
         Tick(Time.deltaTime);
+        if(isDebug)
+        {
+            DEBUG_String = "Unit " + this + " Speed: " + Velocity.ToString();
+        }
     }
 
     public void SetVerticalVelocity(float vy) => Velocity = new Vector2(Velocity.x, vy);

@@ -42,6 +42,13 @@ public class InputAdapter : MonoBehaviour
     [Header("Sprite")]
     [SerializeField] private GameObject mainSprite;
 
+    [Header("UI")]
+    [SerializeField] private HealthManager Health;
+    private Coroutine healthRoutine;
+    private bool isHoldingUIBtn;
+    private int score = 0;
+
+
     private Animator _animator;
 
     // animation IDs
@@ -66,11 +73,22 @@ public class InputAdapter : MonoBehaviour
     private float lastJumpPressedTime = -999f; // time jump was last pressed (buffer)
     private int facingDirection = 1; // 1 = right, -1 = left
     private SpriteRenderer spriteRenderer;
-
-    // private GhostSprites ghost;
-
     private SpriteSpawner ghost;
 
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("Collectible")) 
+       {
+           AudioSource audioSource = other.GetComponent<AudioSource>();
+
+           audioSource.Play();
+           //other.gameObject.SetActive(false);
+           //set colliables into the floor to play audo from collectible
+           other.gameObject.transform.position = other.gameObject.transform.position + new Vector3(0, -2, 0);;
+           score += 1;
+           //SetCountText();
+       }
+    }
     public void OnMove(InputAction.CallbackContext ctx)
     {
         move = ctx.ReadValue<Vector2>();
@@ -120,11 +138,36 @@ public class InputAdapter : MonoBehaviour
         motor.RequestDropThrough();
     }
 
+        public void OnUIVisibility(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            isHoldingUIBtn = true;
+            Health.StartFadeIn();
+
+            if (healthRoutine != null)
+            {
+                StopCoroutine(healthRoutine);
+                healthRoutine = null;
+            }
+        }
+        else if (ctx.canceled)
+        {
+            isHoldingUIBtn = false;
+
+            if (healthRoutine != null)
+                StopCoroutine(healthRoutine);
+
+            healthRoutine = StartCoroutine(FadeOutAfterDelay(2f));
+        }
+    }
+
     void Start()
     {
         spriteRenderer = mainSprite.GetComponent<SpriteRenderer>();  
         _animator = mainSprite.GetComponent<Animator>();
         ghost = mainSprite.GetComponent<SpriteSpawner>();
+        Health = gameObject.GetComponent<HealthManager>();
         ghost.enabled = false;
         AssignAnimationIDs();
     }
@@ -356,6 +399,16 @@ public class InputAdapter : MonoBehaviour
             mainSprite.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             isDashing = false;
         }
+    }
+
+        private IEnumerator FadeOutAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (!isHoldingUIBtn)
+            Health.StartFadeOut();
+
+        healthRoutine = null;
     }
 }
 
