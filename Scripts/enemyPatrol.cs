@@ -63,7 +63,7 @@ public class enemyPatrol : MonoBehaviour
         if (isChasing)
         {
             Vector2 direction = (player.position - transform.position).normalized;
-            rb.velocity = new Vector2(direction.x * chaseSpeed, rb.velocity.y);
+            rb.velocity = new Vector2(direction.x * chaseSpeed, 0);
 
             transform.localScale = new Vector3(-Mathf.Sign(direction.x), 1, 1);
 
