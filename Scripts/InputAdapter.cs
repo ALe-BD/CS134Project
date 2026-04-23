@@ -45,8 +45,9 @@ public class InputAdapter : MonoBehaviour
     [Header("UI")]
     [SerializeField] private HealthManager Health;
     private Coroutine healthRoutine;
-    private bool isHoldingUIBtn;
-    private int score = 0;
+    private bool isHoldingUIBtn = false;
+    public bool isInteracting = false;
+    public int score = 0;
 
 
     private Animator _animator;
@@ -75,20 +76,6 @@ public class InputAdapter : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private SpriteSpawner ghost;
 
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.CompareTag("Collectible")) 
-       {
-           AudioSource audioSource = other.GetComponent<AudioSource>();
-
-           audioSource.Play();
-           //other.gameObject.SetActive(false);
-           //set colliables into the floor to play audo from collectible
-           other.gameObject.transform.position = other.gameObject.transform.position + new Vector3(0, -2, 0);;
-           score += 1;
-           //SetCountText();
-       }
-    }
     public void OnMove(InputAction.CallbackContext ctx)
     {
         move = ctx.ReadValue<Vector2>();
@@ -138,7 +125,7 @@ public class InputAdapter : MonoBehaviour
         motor.RequestDropThrough();
     }
 
-        public void OnUIVisibility(InputAction.CallbackContext ctx)
+    public void OnUIVisibility(InputAction.CallbackContext ctx)
     {
         if (ctx.started)
         {
@@ -162,12 +149,31 @@ public class InputAdapter : MonoBehaviour
         }
     }
 
+    public void OnInteraction(InputAction.CallbackContext ctx)
+    {
+        if (ctx.started)
+        {
+            isInteracting = true;
+        }
+        else if (ctx.canceled)
+        {
+            isInteracting = false;
+        }
+
+    }
+
     void Start()
     {
+        if(mainSprite == null)
+        {
+            mainSprite = transform.Find("Body").gameObject;
+        }
+
         spriteRenderer = mainSprite.GetComponent<SpriteRenderer>();  
         _animator = mainSprite.GetComponent<Animator>();
         ghost = mainSprite.GetComponent<SpriteSpawner>();
         Health = gameObject.GetComponent<HealthManager>();
+
         ghost.enabled = false;
         AssignAnimationIDs();
     }

@@ -8,7 +8,7 @@ public class CollectibleAnim : MonoBehaviour
     [SerializeField] private float floatSpeed = 2f;
     [SerializeField] private float floatHeight = 0.25f;
 
-    private Vector3 startPos;
+    public Vector3 startPos;
     // Start is called before the first frame update
     void Start()
     {
