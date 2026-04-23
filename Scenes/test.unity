@@ -2056,6 +2056,7 @@ GameObject:
   - component: {fileID: 540535140}
   - component: {fileID: 540535143}
   - component: {fileID: 540535144}
+  - component: {fileID: 540535146}
   - component: {fileID: 540535145}
   m_Layer: 0
   m_Name: Player (1)
@@ -2440,6 +2441,18 @@ MonoBehaviour:
   targetComponent: {fileID: 0}
   dumpedVariables: 
   dumpedComponentVariables: 
+--- !u!114 &540535146
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 540535134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a8ca465541a41f4bac51f00f5f6e22c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &592656959
 GameObject:
   m_ObjectHideFlags: 0
@@ -8470,6 +8483,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   DEBUG_String: 
+  sceneToLoad: test 1
+  spawnPointName: SpawnPoint
 --- !u!65 &999095335
 BoxCollider:
   m_ObjectHideFlags: 0

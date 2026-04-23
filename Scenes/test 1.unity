@@ -180,6 +180,8 @@ MonoBehaviour:
   minGroundNormalY: 0.285
   dropThroughTime: 0.12
   drawGizmos: 1
+  isDebug: 1
+  DEBUG_String: 
   ecbQueryCollider: {fileID: 52907508}
   depenetrationMaxIters: 10
   depenetrationExtra: 0.001
@@ -1277,6 +1279,9 @@ MonoBehaviour:
   dashCooldown: 0.25
   maxAirDashes: 1
   mainSprite: {fileID: 1450640334}
+  Health: {fileID: 0}
+  isInteracting: 0
+  score: 0
 --- !u!114 &540535140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1406,6 +1411,8 @@ MonoBehaviour:
   minGroundNormalY: 0.285
   dropThroughTime: 0.12
   drawGizmos: 1
+  isDebug: 1
+  DEBUG_String: 
   ecbQueryCollider: {fileID: 540535142}
   depenetrationMaxIters: 10
   depenetrationExtra: 0.001
@@ -6462,7 +6469,7 @@ SpriteRenderer:
   m_Size: {x: 108.8, y: 9}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &795128369
@@ -7983,7 +7990,7 @@ SpriteRenderer:
   m_Size: {x: 103.96, y: 9}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1940550064
@@ -8071,6 +8078,37 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1971830877
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1971830878}
+  m_Layer: 0
+  m_Name: SpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1971830878
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1971830877}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -31.66, y: 7.59, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2080942639
 GameObject:
   m_ObjectHideFlags: 0
@@ -8297,6 +8335,9 @@ MonoBehaviour:
   dashCooldown: 0.25
   maxAirDashes: 1
   mainSprite: {fileID: 0}
+  Health: {fileID: 0}
+  isInteracting: 0
+  score: 0
 --- !u!114 &2080942645
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8642,6 +8683,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 1567576014}
   - {fileID: 1468745536}
+  - {fileID: 1971830878}
   - {fileID: 418005298}
   - {fileID: 131755307}
   - {fileID: 540535138}
