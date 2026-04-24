@@ -137,6 +137,7 @@ GameObject:
   - component: {fileID: 52907507}
   - component: {fileID: 52907512}
   - component: {fileID: 52907513}
+  - component: {fileID: 52907514}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -344,6 +345,19 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
+--- !u!114 &52907514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 52907504}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14c932e6c4cc740bb97ba27261b1cd50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  health: 50
 --- !u!1 &104053115
 GameObject:
   m_ObjectHideFlags: 0
@@ -7223,6 +7237,7 @@ GameObject:
   - component: {fileID: 968880745}
   - component: {fileID: 968880744}
   - component: {fileID: 968880743}
+  - component: {fileID: 968880752}
   m_Layer: 0
   m_Name: Player (1)
   m_TagString: Player
@@ -7380,6 +7395,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: b1149b12-4b9d-49cc-8df8-1af3ad4d8fca
     m_ActionName: GamePlay/UIVisibility[/XInputControllerWindows/start,/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: a058d65f-0dba-405a-b782-2fbbdfb3dfdc
+    m_ActionName: GamePlay/Interact[/Keyboard/z]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: GamePlay
@@ -7416,6 +7435,8 @@ MonoBehaviour:
   maxAirDashes: 1
   mainSprite: {fileID: 1109127265}
   Health: {fileID: 0}
+  isInteracting: 0
+  score: 0
 --- !u!114 &968880747
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7569,8 +7590,29 @@ Transform:
   - {fileID: 156445441}
   - {fileID: 1329187908}
   - {fileID: 1907574566}
+  - {fileID: 1950638415}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &968880752
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 968880742}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9732f93ceecc4e5db11f3b604102990, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  attackCooldown: 0.5
+  attackDamage: 10
+  attackRange: 2
+  animator: {fileID: 1109127267}
+  attackPoint: {fileID: 1950638415}
+  enemyLayers:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &1075276917
 GameObject:
   m_ObjectHideFlags: 0
@@ -8957,6 +8999,37 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &1950638414
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1950638415}
+  m_Layer: 0
+  m_Name: AttackHitbox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1950638415
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1950638414}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.46, y: -0.28, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 968880751}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2096749523
 GameObject:
   m_ObjectHideFlags: 0

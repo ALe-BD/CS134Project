@@ -51,6 +51,12 @@ public class enemyPatrol : MonoBehaviour
             isChasing = false;
             currentPoint = GetClosestPoint();
         }
+        
+        if (isAttacking)
+        {
+            rb.velocity = Vector2.zero; // ensure no movement
+            return;
+        }
 
         // Attack & chase
         if (!isAttacking && distanceToPlayer <= attackRange && Time.time > lastAttackTime + attackCooldown)
