@@ -8,8 +8,8 @@ public class DisableAfterSound : MonoBehaviour
 
     void Start()
     {
-        audioSource = transform.parent.gameObject.GetComponent<AudioSource>();
-        visualToHide = gameObject;
+        audioSource = GetComponent<AudioSource>();
+        visualToHide = transform.Find("Cube").gameObject;
     }
 
     public void PlayAndDisable()

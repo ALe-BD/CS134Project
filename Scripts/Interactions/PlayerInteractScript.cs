@@ -17,10 +17,11 @@ public class PlayerInteractScript : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Collectible")) 
         {
-           other.gameObject.GetComponent<DisableAfterSound>().PlayAndDisable();
-           Debug.Log("point gained");
-           ia.score += 1;
-           //SetCountText();
+            other.transform.parent.Find("ParticleSystem").GetComponent<ParticleSystem>().Play();
+            other.transform.parent.GetComponent<DisableAfterSound>().PlayAndDisable();
+            Debug.Log("point gained");
+            ia.score += 1;
+            //SetCountText();
         }
         if (other.gameObject.CompareTag("Interactable"))
         {

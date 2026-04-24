@@ -16418,6 +16418,10 @@ PrefabInstance:
       propertyPath: m_IsTrigger
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1742480983643015875, guid: 2a1cf6f109c65f44c921a4541849a5e0, type: 3}
+      propertyPath: m_Name
+      value: ParticleSystem
+      objectReference: {fileID: 0}
     - target: {fileID: 4853729328970854854, guid: 2a1cf6f109c65f44c921a4541849a5e0, type: 3}
       propertyPath: m_TagString
       value: Collectible
