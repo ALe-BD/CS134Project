@@ -2057,6 +2057,7 @@ GameObject:
   - component: {fileID: 540535143}
   - component: {fileID: 540535144}
   - component: {fileID: 540535145}
+  - component: {fileID: 540535146}
   m_Layer: 0
   m_Name: Player (1)
   m_TagString: Player
@@ -2432,15 +2433,23 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 540535134}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 15505de32355b1c4db1b4c275cc0fbc0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   targetScript: {fileID: 540535139}
-  targetComponent: {fileID: 0}
+  targetComponent: {fileID: 540535142}
   dumpedVariables: 
   dumpedComponentVariables: 
+--- !u!81 &540535146
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 540535134}
+  m_Enabled: 1
 --- !u!1 &592656959
 GameObject:
   m_ObjectHideFlags: 0
@@ -8877,37 +8886,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0982dba4f9ebf844e8e75369ee67581b, type: 3}
---- !u!1 &1121622674
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1121622675}
-  m_Layer: 0
-  m_Name: Collectables
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1121622675
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1121622674}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -29.320396, y: 0.8, z: 1.42}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1174217969
 GameObject:
   m_ObjectHideFlags: 0
@@ -9943,7 +9921,7 @@ AudioListener:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1567576011}
-  m_Enabled: 1
+  m_Enabled: 0
 --- !u!20 &1567576013
 Camera:
   m_ObjectHideFlags: 0
@@ -15793,6 +15771,32 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &2026180309 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4853729328970854854, guid: 2a1cf6f109c65f44c921a4541849a5e0, type: 3}
+  m_PrefabInstance: {fileID: 5575658822094115156}
+  m_PrefabAsset: {fileID: 0}
+--- !u!135 &2026180313
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2026180309}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2080942639
 GameObject:
   m_ObjectHideFlags: 0
@@ -16304,6 +16308,10 @@ PrefabInstance:
       propertyPath: m_IsTrigger
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 4853729328970854854, guid: 2a1cf6f109c65f44c921a4541849a5e0, type: 3}
+      propertyPath: m_TagString
+      value: Collectible
+      objectReference: {fileID: 0}
     - target: {fileID: 5081253129058713273, guid: 2a1cf6f109c65f44c921a4541849a5e0, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.55000114
@@ -16355,7 +16363,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4853729328970854854, guid: 2a1cf6f109c65f44c921a4541849a5e0, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2026180313}
   m_SourcePrefab: {fileID: 100100000, guid: 2a1cf6f109c65f44c921a4541849a5e0, type: 3}
 --- !u!1001 &8015278383763501477
 PrefabInstance:
@@ -16438,7 +16449,6 @@ SceneRoots:
   - {fileID: 1531963745}
   - {fileID: 303122977}
   - {fileID: 918498209}
-  - {fileID: 1121622675}
   - {fileID: 271836595}
   - {fileID: 1074636110}
   - {fileID: 1648437637}

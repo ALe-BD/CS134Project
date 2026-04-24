@@ -17,12 +17,7 @@ public class PlayerInteractScript : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Collectible")) 
         {
-           //AudioSource audioSource = other.GetComponent<AudioSource>();
-
-           //audioSource.Play();
-           //other.gameObject.SetActive(false);
-           //set colliables into the floor to play audo from collectible
-           other.GetComponent<CollectibleAnim>().startPos = other.GetComponent<CollectibleAnim>().startPos + new Vector3(0, -2, 0);
+           other.gameObject.GetComponent<DisableAfterSound>().PlayAndDisable();
            Debug.Log("point gained");
            ia.score += 1;
            //SetCountText();
