@@ -18,6 +18,6 @@ public class InteractionScript : MonoBehaviour
 
     public virtual void Interacting()
     {
-        
+
     }
 }

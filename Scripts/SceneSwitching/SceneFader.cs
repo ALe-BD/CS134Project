@@ -1,0 +1,74 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+
+public class SceneFader : MonoBehaviour
+{
+    public static SceneFader Instance;
+
+    [SerializeField] private Image fadeImage;
+    [SerializeField] private float fadeDuration = 0.5f;
+
+    private Coroutine currentFade;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    private void Start()
+    {
+        if (fadeImage != null && !fadeImage.gameObject.activeSelf)
+        {
+            fadeImage.gameObject.SetActive(true);
+        }
+    }
+
+    public void FadeIn()
+    {
+        Debug.Log("Activated");
+        if (currentFade != null)
+            StopCoroutine(currentFade);
+
+        currentFade = StartCoroutine(Fade(1f, 0f));
+    }
+
+    public void FadeOut()
+    {
+        if (currentFade != null)
+            StopCoroutine(currentFade);
+
+        currentFade = StartCoroutine(Fade(0f, 1f));
+    }
+
+    private IEnumerator Fade(float startAlpha, float endAlpha)
+    {
+        float time = 0f;
+        Color color = fadeImage.color;
+        color.a = startAlpha;
+        fadeImage.color = color;
+
+        while (time < fadeDuration)
+        {
+            time += Time.deltaTime;
+            float t = time / fadeDuration;
+
+            color.a = Mathf.Lerp(startAlpha, endAlpha, t);
+            fadeImage.color = color;
+
+            yield return null;
+        }
+
+        color.a = endAlpha;
+        fadeImage.color = color;
+    }
+}

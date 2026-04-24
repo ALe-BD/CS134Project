@@ -9,6 +9,7 @@ public class PlayerInteractScript : MonoBehaviour
 
     [Header("Interaction")]
     [SerializeField] private GameObject interactionHitbox;
+    [SerializeField] private ParticleSystem QM;
     private Collider interactionCollider;
     private Rigidbody interactionRB;
 
@@ -26,6 +27,19 @@ public class PlayerInteractScript : MonoBehaviour
            ia.score += 1;
            //SetCountText();
         }
+        if (other.gameObject.CompareTag("Interactable"))
+        {
+            //spawn question mark above head
+            QM.Play();
+        }
+        if (other.gameObject.CompareTag("Transition"))
+        {
+            other.gameObject.GetComponent<InteractionScript>().Interacting();
+        }
+    }
+
+    void OnTriggerStay(Collider other)
+    {
         if (other.gameObject.CompareTag("Interactable") && ia.isInteracting)
         {
             Debug.Log(other.gameObject.name);
@@ -36,6 +50,7 @@ public class PlayerInteractScript : MonoBehaviour
     void Start()
     {
         parentObj = transform.parent.gameObject;
+        QM = parentObj.transform.Find("QuestionMark").GetComponent<ParticleSystem>();
         ia = parentObj.GetComponent<InputAdapter>();
         interactionCollider = GetComponent<CapsuleCollider>();
         interactionRB = GetComponent<Rigidbody>();

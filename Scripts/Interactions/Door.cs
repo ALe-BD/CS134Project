@@ -24,7 +24,6 @@ public class Door : InteractionScript
     public override void Interacting()
     {
         DEBUG_String = this + ": This is a door";
-        //SceneSpawnSetter.targetPosition = GameObject.Find(spawnPointName).position;
-        SceneManager.LoadScene(sceneToLoad);
+        GetComponent<SceneTransitionManager>().ChangeScene(sceneToLoad, spawnPointName);
     }
 }
