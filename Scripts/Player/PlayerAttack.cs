@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerAttack : MonoBehaviour
 {
@@ -14,14 +15,22 @@ public class PlayerAttack : MonoBehaviour
 
     private float lastAttackTime;
 
-    void Update()
-    {
-        HandleInput();
-    }
+    // void Update()
+    // {
+    //     HandleInput();
+    // }
 
-    void HandleInput()
+    // void HandleInput()
+    // {
+    //     if (Input.GetKeyDown(KeyCode.Q) && Time.time >= lastAttackTime + attackCooldown)
+    //     {
+    //         Attack();
+    //     }
+    // }
+    public void OnAttack(InputAction.CallbackContext ctx)
     {
-        if (Input.GetKeyDown(KeyCode.Q) && Time.time >= lastAttackTime + attackCooldown)
+        if (!ctx.performed) return;
+        if (Time.time >= lastAttackTime + attackCooldown)
         {
             Attack();
         }

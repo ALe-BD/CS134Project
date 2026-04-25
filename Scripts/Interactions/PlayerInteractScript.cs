@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerInteractScript : MonoBehaviour
 {
@@ -9,6 +11,7 @@ public class PlayerInteractScript : MonoBehaviour
 
     [Header("Interaction")]
     [SerializeField] private GameObject interactionHitbox;
+    [SerializeField] private GameObject UI;
     [SerializeField] private ParticleSystem QM;
     private Collider interactionCollider;
     private Rigidbody interactionRB;
@@ -22,6 +25,7 @@ public class PlayerInteractScript : MonoBehaviour
             Debug.Log("point gained");
             ia.score += 1;
             //SetCountText();
+            UI.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = ia.score.ToString("D4");
         }
         if (other.gameObject.CompareTag("Interactable"))
         {
@@ -46,6 +50,7 @@ public class PlayerInteractScript : MonoBehaviour
     void Start()
     {
         parentObj = transform.parent.gameObject;
+        UI = parentObj.transform.parent.Find("UI").gameObject;
         QM = parentObj.transform.Find("QuestionMark").GetComponent<ParticleSystem>();
         ia = parentObj.GetComponent<InputAdapter>();
         interactionCollider = GetComponent<CapsuleCollider>();
