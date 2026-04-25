@@ -31,16 +31,14 @@ public class PlayerAttack : MonoBehaviour
     {
         lastAttackTime = Time.time;
 
-        // Trigger animation
         if (animator != null)
         {
             animator.SetTrigger("Attack");
         }
 
-        // Detect enemies in range
-        Collider[] hitEnemies = Physics.OverlapSphere(attackPoint.position, attackRange, enemyLayers);
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayers);
 
-        foreach (Collider enemy in hitEnemies)
+        foreach (Collider2D enemy in hitEnemies)
         {
             Debug.Log("Hit " + enemy.name);
 

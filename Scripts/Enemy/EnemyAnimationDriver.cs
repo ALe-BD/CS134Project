@@ -2,6 +2,13 @@ using UnityEngine;
 
 public class EnemyAnimationDriver : MonoBehaviour
 {
-    [Header("Assign in Inspector")]
-    public EnemyDamage enemyDamage;
+    public EnemyDamage damage;
+
+    public void DealDamage()
+    {
+        if (damage != null)
+        {
+            damage.DealDamage();
+        }
+    }
 }

@@ -3,44 +3,48 @@ using UnityEngine;
 public class EnemyDamage : MonoBehaviour
 {
     public int damage = 1;
+    public float hitCooldown = 0.5f; // prevents rapid repeat hits
 
-    private bool canDamage;
-    private bool hasHit;
+    private float lastHitTime = -999f;
+    private Collider2D hitbox;
 
     private void Awake()
     {
-        Collider2D col = GetComponent<Collider2D>();
-        if (col != null)
-            col.isTrigger = true;
+        hitbox = GetComponent<Collider2D>();
+
+        if (hitbox != null)
+            hitbox.isTrigger = true;
     }
 
-    public void SetCanDamage(bool value)
+    // 🔥 Call this from animation when attack hits
+    public void DealDamage()
     {
-        canDamage = value;
+        Debug.Log("DealDamage called");
+        if (Time.time < lastHitTime + hitCooldown)
+            return;
 
-        if (value)
+        if (hitbox == null) return;
+
+        Collider2D[] hits = Physics2D.OverlapBoxAll(
+            hitbox.bounds.center,
+            hitbox.bounds.size,
+            0f
+        );
+
+        foreach (Collider2D col in hits)
         {
-            hasHit = false;
-        }
-    }
+            if (!col.CompareTag("Player")) continue;
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        TryDealDamage(collision);
-    }
+            HealthManager health = col.GetComponent<HealthManager>();
 
-    private void TryDealDamage(Collider2D collision)
-    {
-        if (!canDamage || hasHit) return;
+            if (health != null)
+            {
+                Debug.Log("Enemy hit player!");
+                health.Damaged(damage);
 
-        if (!collision.CompareTag("Player")) return;
-
-        HealthManager health = collision.GetComponent<HealthManager>();
-
-        if (health != null)
-        {
-            health.Damaged(damage);
-            hasHit = true;
+                lastHitTime = Time.time; // start cooldown
+                break; // only hit once
+            }
         }
     }
 }
