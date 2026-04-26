@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
+//Custom ECB for collision
 public class ECBMotor2D1 : MonoBehaviour
 {
     [Header("ECB (environment collision shape)")]
@@ -91,6 +92,7 @@ public class ECBMotor2D1 : MonoBehaviour
         _overlapBuf = new Collider2D[overlapBufferSize];
     }
 
+    //If in the ground it will pop the object from the ground
     void DepenetrateFromSolids()
     {
         if (!ecbQueryCollider) return;
@@ -152,6 +154,7 @@ public class ECBMotor2D1 : MonoBehaviour
         }
     }
 
+    //Run Tick()
     void Update()
     {
         Tick(Time.deltaTime);
@@ -234,6 +237,7 @@ public class ECBMotor2D1 : MonoBehaviour
         wasGroundedLastFrame = Grounded;
     }
 
+    //
     void MoveAndCollide(Vector2 move, bool axisIsVertical)
     {
         Vector2 startPos = transform.position;
@@ -305,31 +309,32 @@ public class ECBMotor2D1 : MonoBehaviour
         }
     }
 
+    //Platform check
     bool IsValidPlatformHit(RaycastHit2D hit, Vector2 ecbCenter)
-{
-    // Only treat as one-way ground if we're moving downward or basically not going up
-    if (Velocity.y > 0.01f)
-        return false;
+    {
+        // Only treat as one-way ground if we're moving downward or basically not going up
+        if (Velocity.y > 0.01f)
+            return false;
 
-    // Must be mostly upward-facing (works for slopes too)
-    if (hit.normal.y < minGroundNormalY)
-        return false;
+        // Must be mostly upward-facing (works for slopes too)
+        if (hit.normal.y < minGroundNormalY)
+            return false;
 
-    // Use the contact point (local surface height), NOT bounds.max.y (which breaks on slopes)
-    float surfaceY = hit.point.y;
+        // Use the contact point (local surface height), NOT bounds.max.y (which breaks on slopes)
+        float surfaceY = hit.point.y;
 
-    // ECB bottom BEFORE moving
-    float ecbBottomY = ecbCenter.y - ECBHalfHeight;
+        // ECB bottom BEFORE moving
+        float ecbBottomY = ecbCenter.y - ECBHalfHeight;
 
-    // Only land if bottom is above (or very slightly above) the surface at the contact point
-    const float tolerance = 0.02f; // tweak if needed
-    if (ecbBottomY < surfaceY - tolerance)
-        return false;
+        // Only land if bottom is above (or very slightly above) the surface at the contact point
+        const float tolerance = 0.02f; // tweak if needed
+        if (ecbBottomY < surfaceY - tolerance)
+            return false;
 
-    return true;
-}
+        return true;
+    }
 
-    private static bool LayerInMask(int layer, LayerMask mask) => (mask.value & (1 << layer)) != 0;
+    // private static bool LayerInMask(int layer, LayerMask mask) => (mask.value & (1 << layer)) != 0;
 
     private void UpdateGroundedAndSnap()
     {
@@ -420,10 +425,10 @@ public class ECBMotor2D1 : MonoBehaviour
         return t.normalized;
     }
 
-    private static Vector2 ProjectOn(Vector2 v, Vector2 dirNormalized)
-    {
-        return dirNormalized * Vector2.Dot(v, dirNormalized);
-    }
+    // private static Vector2 ProjectOn(Vector2 v, Vector2 dirNormalized)
+    // {
+    //     return dirNormalized * Vector2.Dot(v, dirNormalized);
+    // }
 
     private void ApplyMovingPlatformMotion(float dt)
     {
@@ -450,6 +455,10 @@ public class ECBMotor2D1 : MonoBehaviour
 
         // How far did it move since last frame?
         Vector2 delta = currentPos - lastGroundBodyPos;
+
+        // Ignore downward platform motion
+        if (delta.y < 0f)
+            delta.y = 0f;
 
         // Move the player by the platform's delta
         if (delta != Vector2.zero)

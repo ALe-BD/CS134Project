@@ -1,12 +1,14 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+//This script finds the player in the scene and moves the player to the spawn point (Put on an object that pesists from the first level)
 public class SceneSpawnSetter : MonoBehaviour
 {
     public static SceneSpawnSetter Instance;
     public static string spawnPointName;
     private void Awake()
     {
+        //clears the instances
         if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
@@ -27,6 +29,7 @@ public class SceneSpawnSetter : MonoBehaviour
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
+    //Plays on every scene load that is not the title screen
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         //Debug.Log("Start" + spawnPointName + "ping");
@@ -39,7 +42,6 @@ public class SceneSpawnSetter : MonoBehaviour
 
         if (player != null && spawnPoint != null)
         {
-            //Debug.Log("Not found");
             player.transform.position = spawnPoint.transform.position;
         }
         //Debug.Log("End");

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Placed on seperate SceneFader gameObject
 public class SceneFader : MonoBehaviour
 {
     public static SceneFader Instance;
@@ -32,24 +33,28 @@ public class SceneFader : MonoBehaviour
             fadeImage.gameObject.SetActive(true);
         }
     }
-
+    
+    //Usually on Scene Entry
     public void FadeIn()
     {
-        Debug.Log("Activated");
+        //stops current fade
         if (currentFade != null)
             StopCoroutine(currentFade);
 
         currentFade = StartCoroutine(Fade(1f, 0f));
     }
 
+    //Usually on Scene Exit
     public void FadeOut()
     {
+        //stops current fade
         if (currentFade != null)
             StopCoroutine(currentFade);
 
         currentFade = StartCoroutine(Fade(0f, 1f));
     }
 
+    //Fades the fadeImages in or out based on the fadeDuration
     private IEnumerator Fade(float startAlpha, float endAlpha)
     {
         float time = 0f;

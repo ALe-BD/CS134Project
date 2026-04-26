@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Base class for any kind of interactable
 public class InteractionScript : MonoBehaviour
 {
     // Start is called before the first frame update
@@ -15,7 +16,7 @@ public class InteractionScript : MonoBehaviour
     {
         
     }
-
+    //Mainly call this to interact
     public virtual void Interacting()
     {
 

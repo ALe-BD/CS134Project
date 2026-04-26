@@ -10,17 +10,7 @@ public class Door : InteractionScript
     [SerializeField] private string sceneToLoad;
     [SerializeField] private string spawnPointName;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
+    //Switch Scenes
     public override void Interacting()
     {
         DEBUG_String = this + ": This is a door";

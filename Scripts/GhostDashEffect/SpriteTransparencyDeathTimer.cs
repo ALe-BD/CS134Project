@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class SpriteTransparencyDeathTimer : MonoBehaviour
 {
-    
     private SpriteRenderer sprite;
 
     public float waitTime = 1f;
@@ -19,12 +18,14 @@ public class SpriteTransparencyDeathTimer : MonoBehaviour
     {
         if (sprite == null) return;
 
+        //destroys ghost object if wait time is set to zero
         if (waitTime <= 0f)
         {
             Destroy(gameObject);
             return;
         }
 
+        //grabs color of sprite decrease the transparency each frame over the waitTime
         Color color = sprite.color;
 
         color.a -= Time.deltaTime / waitTime;
@@ -32,6 +33,7 @@ public class SpriteTransparencyDeathTimer : MonoBehaviour
 
         sprite.color = color;
 
+        //destroys ghost object if alpha reaches zero
         if (color.a <= 0f)
         {
             Destroy(gameObject);

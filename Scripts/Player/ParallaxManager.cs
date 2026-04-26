@@ -7,6 +7,8 @@ using UnityEngine;
 public class BackgroundElement
 {
     public GameObject obj;
+    
+    //1 = fully follow the player (very far from the player) | 0 = does not follow the player (very close to the player)
     [Range(0f, 1f)] public float followAmount = 0.5f;
 }
 public class ParallaxManager : MonoBehaviour
@@ -23,14 +25,14 @@ public class ParallaxManager : MonoBehaviour
             lastPlayerPosition = player.transform.position;
         }
     }
-
-    // Update is called once per frame
     void LateUpdate()
     {
         if (player == null) return;
 
+        //amount player moves
         Vector3 playerDelta = player.transform.position - lastPlayerPosition;
 
+        //for each background move a certain percentage of the player moves
         foreach (BackgroundElement element in backgroundElements)
         {
             if (element.obj == null) continue;

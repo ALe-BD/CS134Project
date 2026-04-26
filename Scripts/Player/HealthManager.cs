@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+//Controls Player Health Bar
 public class HealthManager : MonoBehaviour
 {
     [SerializeField] private GameObject HealthBar;
@@ -17,11 +18,8 @@ public class HealthManager : MonoBehaviour
     private Coroutine fadeRoutine;
     [SerializeField] private float fadeDuration = 2f;
 
-
     [SerializeField, TextArea]
     private string DEBUG_String;
-
-    
 
     // Start is called before the first frame update
     void Start()
@@ -32,7 +30,8 @@ public class HealthManager : MonoBehaviour
         {
             DEBUG_String = this + "ping";
         }
-
+        
+        //get healthbar material
         HealthMaterial = HealthBar.GetComponent<Renderer>().material;
         HealthMaterial.SetFloat("_Radius", Radius);
         HealthMaterial.SetFloat("_LineWidth", LineWidth);
@@ -46,38 +45,63 @@ public class HealthManager : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.I))
-            StartFadeOut();
+        // if (Input.GetKeyDown(KeyCode.I))
+        //     StartFadeOut();
 
-        if (Input.GetKeyDown(KeyCode.O))
-            StartFadeIn();
+        // if (Input.GetKeyDown(KeyCode.O))
+        //     StartFadeIn();
 
-        if (Input.GetKeyDown(KeyCode.R))
-            Damaged(2);
-        if (Input.GetKeyDown(KeyCode.T))
-            Healed(1);
+        // if (Input.GetKeyDown(KeyCode.R))
+        //     Damaged(2);
+        // if (Input.GetKeyDown(KeyCode.T))
+        //     Healed(1);
     }
-
 
     public void Damaged(int damagePoints)
     {
+        StartCoroutine(DamageRoutine(damagePoints));
+    }
+
+    //Damage Logic
+    private IEnumerator DamageRoutine(int damagePoints)
+    {
+        StartFadeIn();
+
         RemovedSegments += damagePoints;
         RemovedSegments = Mathf.Clamp(RemovedSegments, 0, SegmentCount);
         HealthMaterial.SetFloat("_RemoveSegments", RemovedSegments);
+
+        yield return new WaitForSeconds(1f);
+
+        StartFadeOut();
     }
 
     public void Healed(int healPoints)
     {
+        StartCoroutine(HealRoutine(healPoints));
+    }
+
+    //Healing Logic
+    private IEnumerator HealRoutine(int healPoints)
+    {
+        StartFadeIn();
+
         RemovedSegments -= healPoints;
         RemovedSegments = Mathf.Clamp(RemovedSegments, 0, SegmentCount);
         HealthMaterial.SetFloat("_RemoveSegments", RemovedSegments);
+
+        yield return new WaitForSeconds(1f);
+
+        StartFadeOut();
     }
 
+    //Fades the Healthbar out
     public void StartFadeOut()
     {
         StartFadeTo(0f);
     }
 
+    //Fades the Healthbar in
     public void StartFadeIn()
     {
         StartFadeTo(1f);
@@ -91,6 +115,7 @@ public class HealthManager : MonoBehaviour
         fadeRoutine = StartCoroutine(FadeToRoutine(targetAlpha, fadeDuration));
     }
 
+    //Fade Logic
     private IEnumerator FadeToRoutine(float targetAlpha, float fullDuration)
     {
         float startAlpha = Color.a;

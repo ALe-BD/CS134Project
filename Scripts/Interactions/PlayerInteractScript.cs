@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Attached to the Interaction gameObject on player (Manages Interactions from interactables)
 public class PlayerInteractScript : MonoBehaviour
 {
     [SerializeField] private GameObject parentObj;
@@ -18,20 +19,23 @@ public class PlayerInteractScript : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        //Collectible logic: Play collectible sound effect > Run PlayAndDisable > Gain a point > Set Score to UI
         if (other.gameObject.CompareTag("Collectible")) 
         {
-            other.transform.parent.Find("ParticleSystem").GetComponent<ParticleSystem>().Play();
+            other.transform.parent.Find("Particle System").GetComponent<ParticleSystem>().Play();
             other.transform.parent.GetComponent<DisableAfterSound>().PlayAndDisable();
             Debug.Log("point gained");
             ia.score += 1;
             //SetCountText();
             UI.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = ia.score.ToString("D4");
         }
+        //Hint for interactables in location of player
         if (other.gameObject.CompareTag("Interactable"))
         {
             //spawn question mark above head
             QM.Play();
         }
+        //Immediate action if you enter into this collisionbox
         if (other.gameObject.CompareTag("Transition"))
         {
             other.gameObject.GetComponent<InteractionScript>().Interacting();
@@ -40,6 +44,7 @@ public class PlayerInteractScript : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
+        //if you in a interactable and pressing the interaction button
         if (other.gameObject.CompareTag("Interactable") && ia.isInteracting)
         {
             Debug.Log(other.gameObject.name);

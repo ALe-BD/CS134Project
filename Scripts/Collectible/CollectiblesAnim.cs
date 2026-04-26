@@ -21,7 +21,7 @@ public class CollectibleAnim : MonoBehaviour
         // Rotation
         transform.Rotate(rotationSpeed * Time.deltaTime);
 
-        // Up/down motion
+        // Up/down motion (the base of the up and down motion is at the starting position)
         float offsetY = (Mathf.Sin(Time.time * floatSpeed) + 1f) * 0.5f * floatHeight;
         transform.position = new Vector3(
             transform.position.x,

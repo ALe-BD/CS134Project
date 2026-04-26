@@ -6,7 +6,7 @@ public class Transition : InteractionScript
 {
     [SerializeField] private string scene;
     [SerializeField] private string spName = "SpawnPoint";
-    // Start is called before the first frame update
+    //Switch scenes
     public override void Interacting()
     {
         GetComponent<SceneTransitionManager>().ChangeScene(scene, spName);

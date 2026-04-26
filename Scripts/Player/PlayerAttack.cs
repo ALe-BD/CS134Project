@@ -15,18 +15,6 @@ public class PlayerAttack : MonoBehaviour
 
     private float lastAttackTime;
 
-    // void Update()
-    // {
-    //     HandleInput();
-    // }
-
-    // void HandleInput()
-    // {
-    //     if (Input.GetKeyDown(KeyCode.Q) && Time.time >= lastAttackTime + attackCooldown)
-    //     {
-    //         Attack();
-    //     }
-    // }
     public void OnAttack(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;

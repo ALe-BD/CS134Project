@@ -13,7 +13,10 @@ public class InputAdapter : MonoBehaviour
     [SerializeField] private int jumpAmount = 2;     // total jumps (1 = no double jump, 2 = double jump)
     [SerializeField] private float jumpSpeed = 14f;
     [SerializeField] private ParticleSystem jumpVFX;
-    
+    [SerializeField] private AudioClip landingSound;
+    [SerializeField] private AudioSource source;
+
+    private bool wasGrounded;
 
     [Header("Timing")]
     [SerializeField] private float coyoteTime = 0.12f;
@@ -125,6 +128,7 @@ public class InputAdapter : MonoBehaviour
         motor.RequestDropThrough();
     }
 
+    //Check on Health without having it on screen the whole time
     public void OnUIVisibility(InputAction.CallbackContext ctx)
     {
         if (ctx.started)
@@ -169,6 +173,7 @@ public class InputAdapter : MonoBehaviour
             mainSprite = transform.Find("Body").gameObject;
         }
 
+        source = GetComponent<AudioSource>();
         spriteRenderer = mainSprite.GetComponent<SpriteRenderer>();  
         _animator = mainSprite.GetComponent<Animator>();
         ghost = mainSprite.GetComponent<SpriteSpawner>();
@@ -177,6 +182,7 @@ public class InputAdapter : MonoBehaviour
         ghost.enabled = false;
         AssignAnimationIDs();
     }
+
     void Update()
     {
         _hasAnimator = _animator != null;
@@ -196,10 +202,14 @@ public class InputAdapter : MonoBehaviour
         // Determine if grounded
         bool isGrounded = motor.Grounded;
 
-        if (isGrounded)
+        //Disables dash effect if player becomes grounded
+        if (isGrounded && !wasGrounded)
         {
             ghost.enabled = false;
+            source.PlayOneShot(landingSound);
         }
+
+        wasGrounded = isGrounded;
 
         HoriDriver(isGrounded);
         UpdateFacing();
@@ -336,7 +346,7 @@ public class InputAdapter : MonoBehaviour
         if (jumpCount < jumpAmount)
         {
             jumpVFX.Play();
-            jumpVFX.transform.localPosition = transform.localPosition;
+            jumpVFX.transform.position = transform.position;
             motor.SetVerticalVelocity(jumpSpeed);
             jumpCount++;
 
@@ -350,7 +360,6 @@ public class InputAdapter : MonoBehaviour
         isDashing = true;
         dashTimer = dashDuration;
         dashCooldownTimer = dashCooldown;
-        // ghost.trailSize = 10;
         ghost.enabled = true;
 
         if (move != Vector2.zero)

@@ -24,6 +24,7 @@ public class SpriteSpawner : MonoBehaviour
 
         timer += Time.deltaTime;
 
+        //Spawns every spawnInterval
         if (timer >= spawnInterval)
         {
             SpawnSprite();
@@ -31,19 +32,23 @@ public class SpriteSpawner : MonoBehaviour
         }
     }
 
+    //Spawns in the same spite as what the current state as the player (duplicates the Sprite Renderer) and adds the SpriteTransparencyDeathTimer Component to it
     void SpawnSprite()
     {
         GameObject newObj = new GameObject("SpawnedSprite");
 
+        //check and places as a child of a parentObj
         if (parentObject != null)
         {
             newObj.transform.SetParent(parentObject);
         }
         
+        //copies current postion of the body object
         newObj.transform.position = transform.position + spawnOffset;
         newObj.transform.rotation = transform.rotation;
         newObj.transform.localScale = transform.localScale;
 
+        //duplicates the Sprite Renderer
         SpriteRenderer newSprite = newObj.AddComponent<SpriteRenderer>();
         newSprite.sprite = sourceSprite.sprite;
         newSprite.material = sourceSprite.material;
@@ -55,6 +60,7 @@ public class SpriteSpawner : MonoBehaviour
         newSprite.drawMode = sourceSprite.drawMode;
         newSprite.size = sourceSprite.size;
 
+        //adds the SpriteTransparencyDeathTimer Component to it
         SpriteTransparencyDeathTimer fadeScript = newObj.AddComponent<SpriteTransparencyDeathTimer>();
         fadeScript.waitTime = fadeTime;
     }
