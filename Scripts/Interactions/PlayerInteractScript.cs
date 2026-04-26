@@ -36,10 +36,10 @@ public class PlayerInteractScript : MonoBehaviour
             QM.Play();
         }
         //Immediate action if you enter into this collisionbox
-        if (other.gameObject.CompareTag("Transition"))
-        {
-            other.gameObject.GetComponent<InteractionScript>().Interacting();
-        }
+        // if (other.gameObject.CompareTag("Transition"))
+        // {
+        //     other.gameObject.GetComponent<InteractionScript>().Interacting();
+        // }
     }
 
     void OnTriggerStay(Collider other)

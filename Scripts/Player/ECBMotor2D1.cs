@@ -56,7 +56,7 @@ public class ECBMotor2D1 : MonoBehaviour
 
 
     // Public state
-    public Vector2 Velocity { get; private set; }
+    public Vector2 Velocity { get; set; }
     public bool Grounded { get; private set; }
     public Vector2 GroundNormal { get; private set; }
     public bool DisableGravity { get; set; }

@@ -11,9 +11,9 @@ public class HealthManager : MonoBehaviour
     [SerializeField] private float LineWidth = 0.25f;
     [SerializeField] private Color Color;
     [SerializeField] private float Rotation = 0;
-    [SerializeField] private float RemovedSegments = 0;
+    [SerializeField] public float RemovedSegments = 0;
     [SerializeField] private float SegmentSpacing = 0.02f;
-    [SerializeField] private float SegmentCount = 6;
+    [SerializeField] public float SegmentCount = 6;
 
     private Coroutine fadeRoutine;
     [SerializeField] private float fadeDuration = 2f;

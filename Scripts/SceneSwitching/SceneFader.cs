@@ -55,7 +55,7 @@ public class SceneFader : MonoBehaviour
     }
 
     //Fades the fadeImages in or out based on the fadeDuration
-    private IEnumerator Fade(float startAlpha, float endAlpha)
+    public IEnumerator Fade(float startAlpha, float endAlpha)
     {
         float time = 0f;
         Color color = fadeImage.color;

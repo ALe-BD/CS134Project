@@ -49,12 +49,18 @@ public class InputAdapter : MonoBehaviour
     [Header("UI")]
     [SerializeField] private HealthManager Health;
     [SerializeField] private GameObject UI;
+    [SerializeField] private GameObject ScreenOut;
 
+    private SceneFader screenFade;
     private TextMeshProUGUI scoreUI;
     private Coroutine healthRoutine;
     private bool isHoldingUIBtn = false;
     public bool isInteracting = false;
     public int score = 0;
+
+    [Header("Spawn Point")]
+    [SerializeField] private Transform SpawnPoint;
+    private bool hasRespawned = false;
 
 
     private Animator _animator;
@@ -177,6 +183,7 @@ public class InputAdapter : MonoBehaviour
             mainSprite = transform.Find("Body").gameObject;
         }
 
+        SpawnPoint = GameObject.Find("SpawnPoint").transform; //Please don't use the term "SpawnPoint" in any gameObject
         source = GetComponent<AudioSource>();
         spriteRenderer = mainSprite.GetComponent<SpriteRenderer>();  
         _animator = mainSprite.GetComponent<Animator>();
@@ -184,6 +191,8 @@ public class InputAdapter : MonoBehaviour
         Health = GetComponent<HealthManager>();
         UI = transform.parent.Find("UI").gameObject;
         scoreUI = UI.transform.Find("Score").GetComponent<TextMeshProUGUI>();
+        ScreenOut = GameObject.Find("SceneFader");
+        screenFade = ScreenOut.GetComponent<SceneFader>();
 
         ghost.enabled = false;
         AssignAnimationIDs();
@@ -191,7 +200,15 @@ public class InputAdapter : MonoBehaviour
 
     void Update()
     {
+        //Death Cheak
+        if(!hasRespawned && Health.RemovedSegments >= Health.SegmentCount)
+        {
+            hasRespawned = true;
+            StartCoroutine(Respawn());
+        }
+        //Update Score
         scoreUI.text = score.ToString("D4");
+
         _hasAnimator = _animator != null;
         // Update timers
         if (dashCooldownTimer > 0f)
@@ -423,7 +440,7 @@ public class InputAdapter : MonoBehaviour
         }
     }
 
-        private IEnumerator FadeOutAfterDelay(float delay)
+    private IEnumerator FadeOutAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
 
@@ -431,6 +448,25 @@ public class InputAdapter : MonoBehaviour
             Health.StartFadeOut();
 
         healthRoutine = null;
+    }
+
+    private IEnumerator Respawn()
+    {
+        // Fade to black
+        yield return StartCoroutine(screenFade.Fade(0f, 1f));
+
+        // Respawn logic
+        transform.position = SpawnPoint.position;
+        motor.Velocity = Vector3.zero;
+        Health.Healed(Mathf.RoundToInt(Health.SegmentCount));
+
+        // Optional: wait one frame so position/UI fully update before fading back in
+        yield return null;
+
+        // Fade back from black
+        yield return StartCoroutine(screenFade.Fade(1f, 0f));
+
+        hasRespawned = false;
     }
 }
 
