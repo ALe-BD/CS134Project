@@ -5,6 +5,7 @@ using UnityEngine;
 public class DamageZone : InteractionScript
 {
     [SerializeField] private GameObject player;
+    [SerializeField] private int damage;
     void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.CompareTag("Player"))
@@ -16,6 +17,6 @@ public class DamageZone : InteractionScript
 
     public override void Interacting()
     {
-        player.GetComponent<HealthManager>().Damaged(6);
+        player.GetComponent<HealthManager>().Damaged(damage);
     }
 }
