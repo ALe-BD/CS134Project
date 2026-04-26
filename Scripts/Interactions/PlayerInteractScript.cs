@@ -26,8 +26,8 @@ public class PlayerInteractScript : MonoBehaviour
             other.transform.parent.GetComponent<DisableAfterSound>().PlayAndDisable();
             Debug.Log("point gained");
             ia.score += 1;
-            //SetCountText();
-            UI.transform.Find("Score").GetComponent<TextMeshProUGUI>().text = ia.score.ToString("D4");
+            transform.parent.GetComponent<HealthManager>().Healed(1);
+            GameObject.Find("SceneSwitchManager").GetComponent<SceneSpawnSetter>().score = ia.score;
         }
         //Hint for interactables in location of player
         if (other.gameObject.CompareTag("Interactable"))

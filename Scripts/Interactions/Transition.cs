@@ -6,6 +6,7 @@ public class Transition : InteractionScript
 {
     [SerializeField] private string scene;
     [SerializeField] private string spName = "SpawnPoint";
+    
     //Switch scenes
     public override void Interacting()
     {

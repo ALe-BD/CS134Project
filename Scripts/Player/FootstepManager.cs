@@ -26,12 +26,12 @@ public class FootstepManager : MonoBehaviour
     public void PlayStep ()
     {
         UpdateSurfaceFromRaycast();
-        Debug.Log("Step played");
+        // Debug.Log("Step played");
 
         if(currentList == null || currentList.Count == 0)
             return;
         
-        Debug.Log("Step played2");
+        // Debug.Log("Step played2");
         AudioClip clip = currentList[Random.Range(0, currentList.Count)];
         source.PlayOneShot(clip);
     }

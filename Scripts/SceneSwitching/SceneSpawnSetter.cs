@@ -6,6 +6,7 @@ public class SceneSpawnSetter : MonoBehaviour
 {
     public static SceneSpawnSetter Instance;
     public static string spawnPointName;
+    public int score;
     private void Awake()
     {
         //clears the instances
@@ -36,6 +37,7 @@ public class SceneSpawnSetter : MonoBehaviour
         //if (string.IsNullOrEmpty(spawnPointName)) return;
 
         GameObject player = GameObject.Find("Player (1)");
+        player.GetComponent<InputAdapter>().score = score;
         //Debug.Log("Player Found");
         GameObject spawnPoint = GameObject.Find(spawnPointName);
         //Debug.Log("spawnPoint Found");

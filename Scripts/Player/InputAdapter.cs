@@ -4,6 +4,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.VFX;
+using TMPro;
 
 public class InputAdapter : MonoBehaviour
 {
@@ -47,6 +48,9 @@ public class InputAdapter : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private HealthManager Health;
+    [SerializeField] private GameObject UI;
+
+    private TextMeshProUGUI scoreUI;
     private Coroutine healthRoutine;
     private bool isHoldingUIBtn = false;
     public bool isInteracting = false;
@@ -177,7 +181,9 @@ public class InputAdapter : MonoBehaviour
         spriteRenderer = mainSprite.GetComponent<SpriteRenderer>();  
         _animator = mainSprite.GetComponent<Animator>();
         ghost = mainSprite.GetComponent<SpriteSpawner>();
-        Health = gameObject.GetComponent<HealthManager>();
+        Health = GetComponent<HealthManager>();
+        UI = transform.parent.Find("UI").gameObject;
+        scoreUI = UI.transform.Find("Score").GetComponent<TextMeshProUGUI>();
 
         ghost.enabled = false;
         AssignAnimationIDs();
@@ -185,6 +191,7 @@ public class InputAdapter : MonoBehaviour
 
     void Update()
     {
+        scoreUI.text = score.ToString("D4");
         _hasAnimator = _animator != null;
         // Update timers
         if (dashCooldownTimer > 0f)
