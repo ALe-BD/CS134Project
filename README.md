@@ -1,5 +1,26 @@
 # CS134 Project - Hood
 Hood is a 2.5D platform game where you fight fungus creatures and maneuver through various levels.
+- Recommended to use a controller, but can use keyboard
+
+## Controls:
+| Keyboard | Gamepad | Action |
+|---|---|---|
+| WASD | Left Stick | Move |
+| Spacebar | Button South | Jump |
+| S | Stick Down | Drop Though Platforms |
+| Shift | Right Trigger | Dash |
+| E | Start | View Health |
+| Z | Button North | Interact |
+| Q | Button West | Attack |
+
+## Implemented:
+- Run/Dash/Air Dash (Multi-directional)
+- Jump/Double Jump
+- Attack
+- Enemy AI
+- Level 1 (Forest)
+- Health: Damage
+- Interaction Script Setup (Doors, and Signs)
 
 # Setup (This github is only the Asset files for the project)
 - 3D built in Rendering Pipline (Unity 2022.3.62f3)
