@@ -23,6 +23,17 @@ public class SceneFader : MonoBehaviour
         else
         {
             Destroy(gameObject);
+            return;
+        }
+
+        if (fadeImage != null)
+        {
+            // Prevent the fade image from blocking UI clicks
+            fadeImage.raycastTarget = false;
+
+            // Make sure it exists and starts visible/enabled
+            if (!fadeImage.gameObject.activeSelf)
+                fadeImage.gameObject.SetActive(true);
         }
     }
 
@@ -61,6 +72,9 @@ public class SceneFader : MonoBehaviour
         Color color = fadeImage.color;
         color.a = startAlpha;
         fadeImage.color = color;
+
+        // Never let the overlay block button presses
+        fadeImage.raycastTarget = false;
 
         while (time < fadeDuration)
         {

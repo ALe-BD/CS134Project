@@ -37,7 +37,10 @@ public class SceneSpawnSetter : MonoBehaviour
         //if (string.IsNullOrEmpty(spawnPointName)) return;
 
         GameObject player = GameObject.Find("Player (1)");
-        player.GetComponent<InputAdapter>().score = score;
+        if(player != null)
+        {   
+            player.GetComponent<InputAdapter>().score = score;
+        }
         //Debug.Log("Player Found");
         GameObject spawnPoint = GameObject.Find(spawnPointName);
         //Debug.Log("spawnPoint Found");
