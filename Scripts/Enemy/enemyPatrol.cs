@@ -4,21 +4,21 @@ using UnityEngine;
 
 public class enemyPatrol : MonoBehaviour
 {
-    public Transform pointA;
-    public Transform pointB;
-    public Transform player;
+    [SerializeField] public Transform pointA;
+    [SerializeField] public Transform pointB;
+    [SerializeField] public Transform player;
 
     private Rigidbody2D rb;
     public Animator anim;
     private Transform currentPoint;
 
-    public float speed = 2f;
-    public float attackRange = 2f;
-    private float attackCooldown = 1.5f;
-    private float lastAttackTime;
+    [SerializeField] public float speed = 2f;
+    [SerializeField] public float attackRange = 2f;
+    [SerializeField] private float attackCooldown = 1.5f;
+    [SerializeField] private float lastAttackTime;
 
-    public float chaseSpeed = 3.5f;
-    public float patrolBuffer = 2f;
+    [SerializeField] public float chaseSpeed = 3.5f;
+    [SerializeField] public float patrolBuffer = 2f;
 
     private bool isDead = false;
     private bool isChasing = false;
@@ -26,6 +26,8 @@ public class enemyPatrol : MonoBehaviour
 
     void Start()
     {
+        player = GameObject.Find("Player (1)").transform;
+        
         rb = GetComponent<Rigidbody2D>();
 
         if (anim == null)

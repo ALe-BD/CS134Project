@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class EnemyDamage : MonoBehaviour
 {
-    public int damage = 1;
-    public float hitCooldown = 0.5f; // prevents rapid repeat hits
+    [SerializeField] public int damage = 1;
+    [SerializeField] public float hitCooldown = 0.5f; // prevents rapid repeat hits
 
-    private float lastHitTime = -999f;
-    private Collider2D hitbox;
+    [SerializeField] private float lastHitTime = -999f;
+    [SerializeField] private Collider2D hitbox;
 
     private void Awake()
     {

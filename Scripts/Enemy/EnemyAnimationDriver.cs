@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class EnemyAnimationDriver : MonoBehaviour
 {
-    public EnemyDamage damage;
+    [SerializeField] public EnemyDamage damage;
 
     public void DealDamage()
     {
