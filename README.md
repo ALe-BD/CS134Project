@@ -30,7 +30,7 @@ Hood is a 2.5D platform game where you fight fungus creatures and maneuver throu
 - Cinemachine
 - Shader Graph
 - URP
-- 2D Pixel Perfect
+- 2D
 - Post Processing
 - TextMeshPro
 
