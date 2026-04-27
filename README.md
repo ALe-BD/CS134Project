@@ -22,19 +22,21 @@ Hood is a 2.5D platform game where you fight fungus creatures and maneuver throu
 - Health: Damage
 - Interaction Script Setup (Doors, and Signs)
 
-# Setup (This github is only the Asset files for the project)
-- 3D built in Rendering Pipline (Unity 2022.3.62f3)
+# Setup
+- Import both TMP Essentials and Extras
+Window > TextMeshPro > [Import TMP Essential Resources] and [Import TMP Examples & Extras]
 
-## Packages Used:
-- Unity Input System
+
+## Packages Used: (Make sure these are installed)
+- Input System
 - Cinemachine
 - Shader Graph
 - URP
-- 2D Pixel Perfect
+- 2D
 - Post Processing
 - TextMeshPro
 
-## Tags:
+## Tags: 
 - Tag 0: Ground
 - Tag 1: Platform
 - Tag 2: Collectible
