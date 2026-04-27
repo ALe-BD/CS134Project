@@ -38,6 +38,7 @@ public class enemyPatrol : MonoBehaviour
         anim.SetBool("isRunning", true);
     }
 
+    // Enemy state management
     void FixedUpdate()
     {
         if (isDead) return;
@@ -96,6 +97,7 @@ public class enemyPatrol : MonoBehaviour
         }
     }
 
+    // Find closest point when restarting patrol
     Transform GetClosestPoint()
     {
         float distA = Vector2.Distance(transform.position, pointA.position);
@@ -103,6 +105,7 @@ public class enemyPatrol : MonoBehaviour
         return distA < distB ? pointA : pointB;
     }
 
+    // Attack player and chase
     IEnumerator AttackThenChase()
     {
         isAttacking = true;
@@ -123,6 +126,7 @@ public class enemyPatrol : MonoBehaviour
         isAttacking = false;
     }
 
+    // Take damage
     public void TakeDamage()
     {
         if (isDead) return;
@@ -139,6 +143,7 @@ public class enemyPatrol : MonoBehaviour
         Destroy(gameObject, 2f);
     }
     
+    // Keep facing player during attacks
     void FacePlayer()
     {
         float direction = Mathf.Sign(player.position.x - transform.position.x);

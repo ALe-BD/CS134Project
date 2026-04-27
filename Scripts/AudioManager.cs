@@ -6,9 +6,10 @@ public class AudioManager : MonoBehaviour
 {
     public AudioMixer audioMixer;
 
+    // Audio slider logic
     public void SetVolume(float value)
     {
-        // convert linear slider (0–1) to logarithmic dB scale
+        // Log scaling for audio
         float volume = Mathf.Log10(value) * 20;
         audioMixer.SetFloat("MasterVolume", volume);
     }

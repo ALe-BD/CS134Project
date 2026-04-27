@@ -4,6 +4,7 @@ public class EnemyHealth : MonoBehaviour
 {
     [SerializeField] public int health = 50;
 
+    // Decrement enemy hitpoints
     public void TakeDamage(int damage)
     {
         health -= damage;
@@ -15,6 +16,7 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
+    // Destroy enemy object when health reaches 0
     void Die()
     {
         Debug.Log(name + " died");

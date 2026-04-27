@@ -17,6 +17,7 @@ public class HitboxFollower2D : MonoBehaviour
         }
     }
 
+    // Keep hitbox in front of player
     void Update()
     {
         if (player == null) return;
@@ -25,6 +26,7 @@ public class HitboxFollower2D : MonoBehaviour
         UpdateHitboxPosition();
     }
 
+    // Update facing direction
     void UpdateFacingDirection()
     {
         float deltaX = player.position.x - lastPosition.x;
@@ -37,6 +39,7 @@ public class HitboxFollower2D : MonoBehaviour
         lastPosition = player.position;
     }
 
+    // Update hitbox position
     void UpdateHitboxPosition()
     {
         Vector3 newPosition = player.position +

@@ -16,7 +16,7 @@ public class EnemyDamage : MonoBehaviour
             hitbox.isTrigger = true;
     }
 
-    // 🔥 Call this from animation when attack hits
+    // Deal damage if colliding with player object
     public void DealDamage()
     {
         Debug.Log("DealDamage called");

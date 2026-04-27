@@ -15,6 +15,7 @@ public class PlayerAttack : MonoBehaviour
 
     private float lastAttackTime;
 
+    // Check attack cooldown
     public void OnAttack(InputAction.CallbackContext ctx)
     {
         if (!ctx.performed) return;
@@ -24,6 +25,7 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+    // Attack on input
     void Attack()
     {
         lastAttackTime = Time.time;
@@ -48,6 +50,7 @@ public class PlayerAttack : MonoBehaviour
         }
     }
 
+    // Debug method
     void OnDrawGizmosSelected()
     {
         if (attackPoint == null) return;
